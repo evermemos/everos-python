@@ -7,7 +7,7 @@ from typing import Any, cast
 
 import pytest
 
-from everos import Everos, AsyncEveros
+from everos import EverOS, AsyncEverOS
 from tests.utils import assert_matches_type
 from everos.types.v1 import AddResponse, FlushResponse
 
@@ -19,8 +19,8 @@ class TestGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_create(self, client: Everos) -> None:
-        group = client.v1.memories.group.create(
+    def test_method_add(self, client: EverOS) -> None:
+        group = client.v1.memories.group.add(
             group_id="group_id",
             messages=[
                 {
@@ -35,8 +35,8 @@ class TestGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_create_with_all_params(self, client: Everos) -> None:
-        group = client.v1.memories.group.create(
+    def test_method_add_with_all_params(self, client: EverOS) -> None:
+        group = client.v1.memories.group.add(
             group_id="group_id",
             messages=[
                 {
@@ -55,8 +55,8 @@ class TestGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_create(self, client: Everos) -> None:
-        response = client.v1.memories.group.with_raw_response.create(
+    def test_raw_response_add(self, client: EverOS) -> None:
+        response = client.v1.memories.group.with_raw_response.add(
             group_id="group_id",
             messages=[
                 {
@@ -75,8 +75,8 @@ class TestGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_create(self, client: Everos) -> None:
-        with client.v1.memories.group.with_streaming_response.create(
+    def test_streaming_response_add(self, client: EverOS) -> None:
+        with client.v1.memories.group.with_streaming_response.add(
             group_id="group_id",
             messages=[
                 {
@@ -97,7 +97,7 @@ class TestGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_flush(self, client: Everos) -> None:
+    def test_method_flush(self, client: EverOS) -> None:
         group = client.v1.memories.group.flush(
             group_id="group_id",
         )
@@ -105,7 +105,7 @@ class TestGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_flush(self, client: Everos) -> None:
+    def test_raw_response_flush(self, client: EverOS) -> None:
         response = client.v1.memories.group.with_raw_response.flush(
             group_id="group_id",
         )
@@ -117,7 +117,7 @@ class TestGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_flush(self, client: Everos) -> None:
+    def test_streaming_response_flush(self, client: EverOS) -> None:
         with client.v1.memories.group.with_streaming_response.flush(
             group_id="group_id",
         ) as response:
@@ -137,8 +137,8 @@ class TestAsyncGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_create(self, async_client: AsyncEveros) -> None:
-        group = await async_client.v1.memories.group.create(
+    async def test_method_add(self, async_client: AsyncEverOS) -> None:
+        group = await async_client.v1.memories.group.add(
             group_id="group_id",
             messages=[
                 {
@@ -153,8 +153,8 @@ class TestAsyncGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_create_with_all_params(self, async_client: AsyncEveros) -> None:
-        group = await async_client.v1.memories.group.create(
+    async def test_method_add_with_all_params(self, async_client: AsyncEverOS) -> None:
+        group = await async_client.v1.memories.group.add(
             group_id="group_id",
             messages=[
                 {
@@ -173,8 +173,8 @@ class TestAsyncGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_create(self, async_client: AsyncEveros) -> None:
-        response = await async_client.v1.memories.group.with_raw_response.create(
+    async def test_raw_response_add(self, async_client: AsyncEverOS) -> None:
+        response = await async_client.v1.memories.group.with_raw_response.add(
             group_id="group_id",
             messages=[
                 {
@@ -193,8 +193,8 @@ class TestAsyncGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_create(self, async_client: AsyncEveros) -> None:
-        async with async_client.v1.memories.group.with_streaming_response.create(
+    async def test_streaming_response_add(self, async_client: AsyncEverOS) -> None:
+        async with async_client.v1.memories.group.with_streaming_response.add(
             group_id="group_id",
             messages=[
                 {
@@ -215,7 +215,7 @@ class TestAsyncGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_flush(self, async_client: AsyncEveros) -> None:
+    async def test_method_flush(self, async_client: AsyncEverOS) -> None:
         group = await async_client.v1.memories.group.flush(
             group_id="group_id",
         )
@@ -223,7 +223,7 @@ class TestAsyncGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_flush(self, async_client: AsyncEveros) -> None:
+    async def test_raw_response_flush(self, async_client: AsyncEverOS) -> None:
         response = await async_client.v1.memories.group.with_raw_response.flush(
             group_id="group_id",
         )
@@ -235,7 +235,7 @@ class TestAsyncGroup:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_flush(self, async_client: AsyncEveros) -> None:
+    async def test_streaming_response_flush(self, async_client: AsyncEverOS) -> None:
         async with async_client.v1.memories.group.with_streaming_response.flush(
             group_id="group_id",
         ) as response:

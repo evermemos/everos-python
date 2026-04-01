@@ -27,9 +27,9 @@ from ...._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not
 from ...._utils import maybe_transform, async_maybe_transform
 from ...._compat import cached_property
 from ....types.v1 import (
+    memory_add_params,
     memory_get_params,
     memory_flush_params,
-    memory_create_params,
     memory_delete_params,
     memory_search_params,
 )
@@ -43,8 +43,9 @@ from ...._response import (
 from ...._base_client import make_request_options
 from ....types.v1.add_response import AddResponse
 from ....types.v1.flush_response import FlushResponse
-from ....types.v1.memory_get_response import MemoryGetResponse
-from ....types.v1.memory_search_response import MemorySearchResponse
+from ....types.v1.message_item_param import MessageItemParam
+from ....types.v1.get_memories_response import GetMemoriesResponse
+from ....types.v1.search_memories_response import SearchMemoriesResponse
 
 __all__ = ["MemoriesResource", "AsyncMemoriesResource"]
 
@@ -53,14 +54,14 @@ class MemoriesResource(SyncAPIResource):
     """Memory ingestion, retrieval, search, and deletion"""
 
     @cached_property
-    def group(self) -> GroupResource:
-        """Memory ingestion, retrieval, search, and deletion"""
-        return GroupResource(self._client)
-
-    @cached_property
     def agent(self) -> AgentResource:
         """Memory ingestion, retrieval, search, and deletion"""
         return AgentResource(self._client)
+
+    @cached_property
+    def group(self) -> GroupResource:
+        """Memory ingestion, retrieval, search, and deletion"""
+        return GroupResource(self._client)
 
     @cached_property
     def with_raw_response(self) -> MemoriesResourceWithRawResponse:
@@ -80,60 +81,6 @@ class MemoriesResource(SyncAPIResource):
         For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
         """
         return MemoriesResourceWithStreamingResponse(self)
-
-    def create(
-        self,
-        *,
-        messages: Iterable[memory_create_params.Message],
-        user_id: str,
-        async_mode: bool | Omit = omit,
-        session_id: Optional[str] | Omit = omit,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AddResponse:
-        """Store batch messages into personal memory space.
-
-        Messages are accumulated and
-        boundary detection triggers memory extraction automatically.
-
-        Args:
-          messages: Batch message array (1-500 items)
-
-          user_id: Owner user ID
-
-          async_mode: Enable async processing. When true, returns 202 with task_id; when false,
-              processes synchronously and returns 200.
-
-          session_id: Session identifier
-
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        return self._post(
-            "/api/v1/memories",
-            body=maybe_transform(
-                {
-                    "messages": messages,
-                    "user_id": user_id,
-                    "async_mode": async_mode,
-                    "session_id": session_id,
-                },
-                memory_create_params.MemoryCreateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=AddResponse,
-        )
 
     def delete(
         self,
@@ -200,6 +147,60 @@ class MemoriesResource(SyncAPIResource):
             cast_to=NoneType,
         )
 
+    def add(
+        self,
+        *,
+        messages: Iterable[MessageItemParam],
+        user_id: str,
+        async_mode: bool | Omit = omit,
+        session_id: Optional[str] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> AddResponse:
+        """Store batch messages into personal memory space.
+
+        Messages are accumulated and
+        boundary detection triggers memory extraction automatically.
+
+        Args:
+          messages: Batch message array (1-500 items)
+
+          user_id: Owner user ID
+
+          async_mode: Enable async processing. When true, returns 202 with task_id; when false,
+              processes synchronously and returns 200.
+
+          session_id: Session identifier
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._post(
+            "/api/v1/memories",
+            body=maybe_transform(
+                {
+                    "messages": messages,
+                    "user_id": user_id,
+                    "async_mode": async_mode,
+                    "session_id": session_id,
+                },
+                memory_add_params.MemoryAddParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=AddResponse,
+        )
+
     def flush(
         self,
         *,
@@ -260,7 +261,7 @@ class MemoriesResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> MemoryGetResponse:
+    ) -> GetMemoriesResponse:
         """Retrieve structured memories using filters DSL with pagination.
 
         Supports
@@ -327,7 +328,7 @@ class MemoriesResource(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=MemoryGetResponse,
+            cast_to=GetMemoriesResponse,
         )
 
     def search(
@@ -346,7 +347,7 @@ class MemoriesResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> MemorySearchResponse:
+    ) -> SearchMemoriesResponse:
         """
         Unified memory search endpoint supporting multiple memory types and retrieval
         methods.
@@ -412,7 +413,7 @@ class MemoriesResource(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=MemorySearchResponse,
+            cast_to=SearchMemoriesResponse,
         )
 
 
@@ -420,14 +421,14 @@ class AsyncMemoriesResource(AsyncAPIResource):
     """Memory ingestion, retrieval, search, and deletion"""
 
     @cached_property
-    def group(self) -> AsyncGroupResource:
-        """Memory ingestion, retrieval, search, and deletion"""
-        return AsyncGroupResource(self._client)
-
-    @cached_property
     def agent(self) -> AsyncAgentResource:
         """Memory ingestion, retrieval, search, and deletion"""
         return AsyncAgentResource(self._client)
+
+    @cached_property
+    def group(self) -> AsyncGroupResource:
+        """Memory ingestion, retrieval, search, and deletion"""
+        return AsyncGroupResource(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncMemoriesResourceWithRawResponse:
@@ -447,60 +448,6 @@ class AsyncMemoriesResource(AsyncAPIResource):
         For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
         """
         return AsyncMemoriesResourceWithStreamingResponse(self)
-
-    async def create(
-        self,
-        *,
-        messages: Iterable[memory_create_params.Message],
-        user_id: str,
-        async_mode: bool | Omit = omit,
-        session_id: Optional[str] | Omit = omit,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AddResponse:
-        """Store batch messages into personal memory space.
-
-        Messages are accumulated and
-        boundary detection triggers memory extraction automatically.
-
-        Args:
-          messages: Batch message array (1-500 items)
-
-          user_id: Owner user ID
-
-          async_mode: Enable async processing. When true, returns 202 with task_id; when false,
-              processes synchronously and returns 200.
-
-          session_id: Session identifier
-
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        return await self._post(
-            "/api/v1/memories",
-            body=await async_maybe_transform(
-                {
-                    "messages": messages,
-                    "user_id": user_id,
-                    "async_mode": async_mode,
-                    "session_id": session_id,
-                },
-                memory_create_params.MemoryCreateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=AddResponse,
-        )
 
     async def delete(
         self,
@@ -567,6 +514,60 @@ class AsyncMemoriesResource(AsyncAPIResource):
             cast_to=NoneType,
         )
 
+    async def add(
+        self,
+        *,
+        messages: Iterable[MessageItemParam],
+        user_id: str,
+        async_mode: bool | Omit = omit,
+        session_id: Optional[str] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> AddResponse:
+        """Store batch messages into personal memory space.
+
+        Messages are accumulated and
+        boundary detection triggers memory extraction automatically.
+
+        Args:
+          messages: Batch message array (1-500 items)
+
+          user_id: Owner user ID
+
+          async_mode: Enable async processing. When true, returns 202 with task_id; when false,
+              processes synchronously and returns 200.
+
+          session_id: Session identifier
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return await self._post(
+            "/api/v1/memories",
+            body=await async_maybe_transform(
+                {
+                    "messages": messages,
+                    "user_id": user_id,
+                    "async_mode": async_mode,
+                    "session_id": session_id,
+                },
+                memory_add_params.MemoryAddParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=AddResponse,
+        )
+
     async def flush(
         self,
         *,
@@ -627,7 +628,7 @@ class AsyncMemoriesResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> MemoryGetResponse:
+    ) -> GetMemoriesResponse:
         """Retrieve structured memories using filters DSL with pagination.
 
         Supports
@@ -694,7 +695,7 @@ class AsyncMemoriesResource(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=MemoryGetResponse,
+            cast_to=GetMemoriesResponse,
         )
 
     async def search(
@@ -713,7 +714,7 @@ class AsyncMemoriesResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> MemorySearchResponse:
+    ) -> SearchMemoriesResponse:
         """
         Unified memory search endpoint supporting multiple memory types and retrieval
         methods.
@@ -779,7 +780,7 @@ class AsyncMemoriesResource(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=MemorySearchResponse,
+            cast_to=SearchMemoriesResponse,
         )
 
 
@@ -787,11 +788,11 @@ class MemoriesResourceWithRawResponse:
     def __init__(self, memories: MemoriesResource) -> None:
         self._memories = memories
 
-        self.create = to_raw_response_wrapper(
-            memories.create,
-        )
         self.delete = to_raw_response_wrapper(
             memories.delete,
+        )
+        self.add = to_raw_response_wrapper(
+            memories.add,
         )
         self.flush = to_raw_response_wrapper(
             memories.flush,
@@ -804,25 +805,25 @@ class MemoriesResourceWithRawResponse:
         )
 
     @cached_property
-    def group(self) -> GroupResourceWithRawResponse:
-        """Memory ingestion, retrieval, search, and deletion"""
-        return GroupResourceWithRawResponse(self._memories.group)
-
-    @cached_property
     def agent(self) -> AgentResourceWithRawResponse:
         """Memory ingestion, retrieval, search, and deletion"""
         return AgentResourceWithRawResponse(self._memories.agent)
+
+    @cached_property
+    def group(self) -> GroupResourceWithRawResponse:
+        """Memory ingestion, retrieval, search, and deletion"""
+        return GroupResourceWithRawResponse(self._memories.group)
 
 
 class AsyncMemoriesResourceWithRawResponse:
     def __init__(self, memories: AsyncMemoriesResource) -> None:
         self._memories = memories
 
-        self.create = async_to_raw_response_wrapper(
-            memories.create,
-        )
         self.delete = async_to_raw_response_wrapper(
             memories.delete,
+        )
+        self.add = async_to_raw_response_wrapper(
+            memories.add,
         )
         self.flush = async_to_raw_response_wrapper(
             memories.flush,
@@ -835,25 +836,25 @@ class AsyncMemoriesResourceWithRawResponse:
         )
 
     @cached_property
-    def group(self) -> AsyncGroupResourceWithRawResponse:
-        """Memory ingestion, retrieval, search, and deletion"""
-        return AsyncGroupResourceWithRawResponse(self._memories.group)
-
-    @cached_property
     def agent(self) -> AsyncAgentResourceWithRawResponse:
         """Memory ingestion, retrieval, search, and deletion"""
         return AsyncAgentResourceWithRawResponse(self._memories.agent)
+
+    @cached_property
+    def group(self) -> AsyncGroupResourceWithRawResponse:
+        """Memory ingestion, retrieval, search, and deletion"""
+        return AsyncGroupResourceWithRawResponse(self._memories.group)
 
 
 class MemoriesResourceWithStreamingResponse:
     def __init__(self, memories: MemoriesResource) -> None:
         self._memories = memories
 
-        self.create = to_streamed_response_wrapper(
-            memories.create,
-        )
         self.delete = to_streamed_response_wrapper(
             memories.delete,
+        )
+        self.add = to_streamed_response_wrapper(
+            memories.add,
         )
         self.flush = to_streamed_response_wrapper(
             memories.flush,
@@ -866,25 +867,25 @@ class MemoriesResourceWithStreamingResponse:
         )
 
     @cached_property
-    def group(self) -> GroupResourceWithStreamingResponse:
-        """Memory ingestion, retrieval, search, and deletion"""
-        return GroupResourceWithStreamingResponse(self._memories.group)
-
-    @cached_property
     def agent(self) -> AgentResourceWithStreamingResponse:
         """Memory ingestion, retrieval, search, and deletion"""
         return AgentResourceWithStreamingResponse(self._memories.agent)
+
+    @cached_property
+    def group(self) -> GroupResourceWithStreamingResponse:
+        """Memory ingestion, retrieval, search, and deletion"""
+        return GroupResourceWithStreamingResponse(self._memories.group)
 
 
 class AsyncMemoriesResourceWithStreamingResponse:
     def __init__(self, memories: AsyncMemoriesResource) -> None:
         self._memories = memories
 
-        self.create = async_to_streamed_response_wrapper(
-            memories.create,
-        )
         self.delete = async_to_streamed_response_wrapper(
             memories.delete,
+        )
+        self.add = async_to_streamed_response_wrapper(
+            memories.add,
         )
         self.flush = async_to_streamed_response_wrapper(
             memories.flush,
@@ -897,11 +898,11 @@ class AsyncMemoriesResourceWithStreamingResponse:
         )
 
     @cached_property
-    def group(self) -> AsyncGroupResourceWithStreamingResponse:
-        """Memory ingestion, retrieval, search, and deletion"""
-        return AsyncGroupResourceWithStreamingResponse(self._memories.group)
-
-    @cached_property
     def agent(self) -> AsyncAgentResourceWithStreamingResponse:
         """Memory ingestion, retrieval, search, and deletion"""
         return AsyncAgentResourceWithStreamingResponse(self._memories.agent)
+
+    @cached_property
+    def group(self) -> AsyncGroupResourceWithStreamingResponse:
+        """Memory ingestion, retrieval, search, and deletion"""
+        return AsyncGroupResourceWithStreamingResponse(self._memories.group)

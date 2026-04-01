@@ -1,9 +1,9 @@
-# Everos Python API library
+# EverOS API library
 
 <!-- prettier-ignore -->
 [![PyPI version](https://img.shields.io/pypi/v/everos.svg?label=pypi%20(stable))](https://pypi.org/project/everos/)
 
-The Everos Python library provides convenient access to the Everos REST API from any Python 3.9+
+The EverOS library provides convenient access to the Ever OS REST API from any Python 3.9+
 application. The library includes type definitions for all request params and response fields,
 and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
 
@@ -26,23 +26,21 @@ The full API of this library can be found in [api.md](api.md).
 
 ```python
 import os
-from everos import Everos
+from everos import EverOS
 
-client = Everos(
+client = EverOS(
     api_key=os.environ.get("EVEROS_API_KEY"),  # This is the default and can be omitted
-    # or 'production' | 'test' | 'environment_3'; defaults to "production".
-    environment="environment_1",
 )
 
-add_response = client.v1.memories.create(
+add_response = client.v1.memories.add(
     messages=[
         {
-            "content": "x",
             "role": "user",
-            "timestamp": 0,
+            "timestamp": 1705318800000,
+            "content": "Hello, how are you?",
         }
     ],
-    user_id="user_id",
+    user_id="user_123",
 )
 print(add_response.data)
 ```
@@ -54,30 +52,28 @@ so that your API Key is not stored in source control.
 
 ## Async usage
 
-Simply import `AsyncEveros` instead of `Everos` and use `await` with each API call:
+Simply import `AsyncEverOS` instead of `EverOS` and use `await` with each API call:
 
 ```python
 import os
 import asyncio
-from everos import AsyncEveros
+from everos import AsyncEverOS
 
-client = AsyncEveros(
+client = AsyncEverOS(
     api_key=os.environ.get("EVEROS_API_KEY"),  # This is the default and can be omitted
-    # or 'production' | 'test' | 'environment_3'; defaults to "production".
-    environment="environment_1",
 )
 
 
 async def main() -> None:
-    add_response = await client.v1.memories.create(
+    add_response = await client.v1.memories.add(
         messages=[
             {
-                "content": "x",
                 "role": "user",
-                "timestamp": 0,
+                "timestamp": 1705318800000,
+                "content": "Hello, how are you?",
             }
         ],
-        user_id="user_id",
+        user_id="user_123",
     )
     print(add_response.data)
 
@@ -104,23 +100,23 @@ Then you can enable it by instantiating the client with `http_client=DefaultAioH
 import os
 import asyncio
 from everos import DefaultAioHttpClient
-from everos import AsyncEveros
+from everos import AsyncEverOS
 
 
 async def main() -> None:
-    async with AsyncEveros(
+    async with AsyncEverOS(
         api_key=os.environ.get("EVEROS_API_KEY"),  # This is the default and can be omitted
         http_client=DefaultAioHttpClient(),
     ) as client:
-        add_response = await client.v1.memories.create(
+        add_response = await client.v1.memories.add(
             messages=[
                 {
-                    "content": "x",
                     "role": "user",
-                    "timestamp": 0,
+                    "timestamp": 1705318800000,
+                    "content": "Hello, how are you?",
                 }
             ],
-            user_id="user_id",
+            user_id="user_123",
         )
         print(add_response.data)
 
@@ -142,9 +138,9 @@ Typed requests and responses provide autocomplete and documentation within your 
 Nested parameters are dictionaries, typed using `TypedDict`, for example:
 
 ```python
-from everos import Everos
+from everos import EverOS
 
-client = Everos()
+client = EverOS()
 
 settings_api_response = client.v1.settings.update(
     llm_custom_setting={},
@@ -163,20 +159,20 @@ All errors inherit from `everos.APIError`.
 
 ```python
 import everos
-from everos import Everos
+from everos import EverOS
 
-client = Everos()
+client = EverOS()
 
 try:
-    client.v1.memories.create(
+    client.v1.memories.add(
         messages=[
             {
-                "content": "x",
                 "role": "user",
-                "timestamp": 0,
+                "timestamp": 1705318800000,
+                "content": "Hello, how are you?",
             }
         ],
-        user_id="user_id",
+        user_id="user_123",
     )
 except everos.APIConnectionError as e:
     print("The server could not be reached")
@@ -211,24 +207,24 @@ Connection errors (for example, due to a network connectivity problem), 408 Requ
 You can use the `max_retries` option to configure or disable retry settings:
 
 ```python
-from everos import Everos
+from everos import EverOS
 
 # Configure the default for all requests:
-client = Everos(
+client = EverOS(
     # default is 2
     max_retries=0,
 )
 
 # Or, configure per-request:
-client.with_options(max_retries=5).v1.memories.create(
+client.with_options(max_retries=5).v1.memories.add(
     messages=[
         {
-            "content": "x",
             "role": "user",
-            "timestamp": 0,
+            "timestamp": 1705318800000,
+            "content": "Hello, how are you?",
         }
     ],
-    user_id="user_id",
+    user_id="user_123",
 )
 ```
 
@@ -238,29 +234,29 @@ By default requests time out after 1 minute. You can configure this with a `time
 which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) object:
 
 ```python
-from everos import Everos
+from everos import EverOS
 
 # Configure the default for all requests:
-client = Everos(
+client = EverOS(
     # 20 seconds (default is 1 minute)
     timeout=20.0,
 )
 
 # More granular control:
-client = Everos(
+client = EverOS(
     timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
 )
 
 # Override per-request:
-client.with_options(timeout=5.0).v1.memories.create(
+client.with_options(timeout=5.0).v1.memories.add(
     messages=[
         {
-            "content": "x",
             "role": "user",
-            "timestamp": 0,
+            "timestamp": 1705318800000,
+            "content": "Hello, how are you?",
         }
     ],
-    user_id="user_id",
+    user_id="user_123",
 )
 ```
 
@@ -274,10 +270,10 @@ Note that requests that time out are [retried twice by default](#retries).
 
 We use the standard library [`logging`](https://docs.python.org/3/library/logging.html) module.
 
-You can enable logging by setting the environment variable `EVEROS_LOG` to `info`.
+You can enable logging by setting the environment variable `EVER_OS_LOG` to `info`.
 
 ```shell
-$ export EVEROS_LOG=info
+$ export EVER_OS_LOG=info
 ```
 
 Or to `debug` for more verbose logging.
@@ -299,20 +295,20 @@ if response.my_field is None:
 The "raw" Response object can be accessed by prefixing `.with_raw_response.` to any HTTP method call, e.g.,
 
 ```py
-from everos import Everos
+from everos import EverOS
 
-client = Everos()
-response = client.v1.memories.with_raw_response.create(
+client = EverOS()
+response = client.v1.memories.with_raw_response.add(
     messages=[{
-        "content": "x",
         "role": "user",
-        "timestamp": 0,
+        "timestamp": 1705318800000,
+        "content": "Hello, how are you?",
     }],
-    user_id="user_id",
+    user_id="user_123",
 )
 print(response.headers.get('X-My-Header'))
 
-memory = response.parse()  # get the object that `v1.memories.create()` would have returned
+memory = response.parse()  # get the object that `v1.memories.add()` would have returned
 print(memory.data)
 ```
 
@@ -327,15 +323,15 @@ The above interface eagerly reads the full response body when you make the reque
 To stream the response body, use `.with_streaming_response` instead, which requires a context manager and only reads the response body once you call `.read()`, `.text()`, `.json()`, `.iter_bytes()`, `.iter_text()`, `.iter_lines()` or `.parse()`. In the async client, these are async methods.
 
 ```python
-with client.v1.memories.with_streaming_response.create(
+with client.v1.memories.with_streaming_response.add(
     messages=[
         {
-            "content": "x",
             "role": "user",
-            "timestamp": 0,
+            "timestamp": 1705318800000,
+            "content": "Hello, how are you?",
         }
     ],
-    user_id="user_id",
+    user_id="user_123",
 ) as response:
     print(response.headers.get("X-My-Header"))
 
@@ -389,10 +385,10 @@ You can directly override the [httpx client](https://www.python-httpx.org/api/#c
 
 ```python
 import httpx
-from everos import Everos, DefaultHttpxClient
+from everos import EverOS, DefaultHttpxClient
 
-client = Everos(
-    # Or use the `EVEROS_BASE_URL` env var
+client = EverOS(
+    # Or use the `EVER_OS_BASE_URL` env var
     base_url="http://my.test.server.example.com:8083",
     http_client=DefaultHttpxClient(
         proxy="http://my.test.proxy.example.com",
@@ -412,9 +408,9 @@ client.with_options(http_client=DefaultHttpxClient(...))
 By default the library closes underlying HTTP connections whenever the client is [garbage collected](https://docs.python.org/3/reference/datamodel.html#object.__del__). You can manually close the client using the `.close()` method if desired, or with a context manager that closes when exiting.
 
 ```py
-from everos import Everos
+from everos import EverOS
 
-with Everos() as client:
+with EverOS() as client:
   # make requests here
   ...
 

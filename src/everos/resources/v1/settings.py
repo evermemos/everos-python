@@ -20,6 +20,7 @@ from ..._response import (
 )
 from ..._base_client import make_request_options
 from ...types.v1.settings_api_response import SettingsAPIResponse
+from ...types.v1.llm_custom_setting_param import LlmCustomSettingParam
 
 __all__ = ["SettingsResource", "AsyncSettingsResource"]
 
@@ -70,7 +71,7 @@ class SettingsResource(SyncAPIResource):
         *,
         boundary_detection_timeout: Optional[int] | Omit = omit,
         extraction_mode: Optional[Literal["default", "pro"]] | Omit = omit,
-        llm_custom_setting: Optional[setting_update_params.LlmCustomSetting] | Omit = omit,
+        llm_custom_setting: Optional[LlmCustomSettingParam] | Omit = omit,
         offline_profile_extraction_interval: Optional[int] | Omit = omit,
         timezone: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -169,7 +170,7 @@ class AsyncSettingsResource(AsyncAPIResource):
         *,
         boundary_detection_timeout: Optional[int] | Omit = omit,
         extraction_mode: Optional[Literal["default", "pro"]] | Omit = omit,
-        llm_custom_setting: Optional[setting_update_params.LlmCustomSetting] | Omit = omit,
+        llm_custom_setting: Optional[LlmCustomSettingParam] | Omit = omit,
         offline_profile_extraction_interval: Optional[int] | Omit = omit,
         timezone: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.

@@ -7,7 +7,7 @@ from typing import Any, cast
 
 import pytest
 
-from everos import Everos, AsyncEveros
+from everos import EverOS, AsyncEverOS
 from tests.utils import assert_matches_type
 from everos.types.v1 import GroupAPIResponse
 
@@ -19,7 +19,51 @@ class TestGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_retrieve(self, client: Everos) -> None:
+    def test_method_create(self, client: EverOS) -> None:
+        group = client.v1.groups.create(
+            group_id="group_abc",
+        )
+        assert_matches_type(GroupAPIResponse, group, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_create_with_all_params(self, client: EverOS) -> None:
+        group = client.v1.groups.create(
+            group_id="group_abc",
+            description="Weekly sync on Project X",
+            name="Project Discussion",
+        )
+        assert_matches_type(GroupAPIResponse, group, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_create(self, client: EverOS) -> None:
+        response = client.v1.groups.with_raw_response.create(
+            group_id="group_abc",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        group = response.parse()
+        assert_matches_type(GroupAPIResponse, group, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_create(self, client: EverOS) -> None:
+        with client.v1.groups.with_streaming_response.create(
+            group_id="group_abc",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            group = response.parse()
+            assert_matches_type(GroupAPIResponse, group, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_retrieve(self, client: EverOS) -> None:
         group = client.v1.groups.retrieve(
             "group_abc",
         )
@@ -27,7 +71,7 @@ class TestGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_retrieve(self, client: Everos) -> None:
+    def test_raw_response_retrieve(self, client: EverOS) -> None:
         response = client.v1.groups.with_raw_response.retrieve(
             "group_abc",
         )
@@ -39,7 +83,7 @@ class TestGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_retrieve(self, client: Everos) -> None:
+    def test_streaming_response_retrieve(self, client: EverOS) -> None:
         with client.v1.groups.with_streaming_response.retrieve(
             "group_abc",
         ) as response:
@@ -53,7 +97,7 @@ class TestGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_path_params_retrieve(self, client: Everos) -> None:
+    def test_path_params_retrieve(self, client: EverOS) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `group_id` but received ''"):
             client.v1.groups.with_raw_response.retrieve(
                 "",
@@ -61,16 +105,16 @@ class TestGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_update(self, client: Everos) -> None:
-        group = client.v1.groups.update(
+    def test_method_patch(self, client: EverOS) -> None:
+        group = client.v1.groups.patch(
             group_id="group_abc",
         )
         assert_matches_type(GroupAPIResponse, group, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_update_with_all_params(self, client: Everos) -> None:
-        group = client.v1.groups.update(
+    def test_method_patch_with_all_params(self, client: EverOS) -> None:
+        group = client.v1.groups.patch(
             group_id="group_abc",
             description="description",
             name="name",
@@ -79,8 +123,8 @@ class TestGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_update(self, client: Everos) -> None:
-        response = client.v1.groups.with_raw_response.update(
+    def test_raw_response_patch(self, client: EverOS) -> None:
+        response = client.v1.groups.with_raw_response.patch(
             group_id="group_abc",
         )
 
@@ -91,8 +135,8 @@ class TestGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_update(self, client: Everos) -> None:
-        with client.v1.groups.with_streaming_response.update(
+    def test_streaming_response_patch(self, client: EverOS) -> None:
+        with client.v1.groups.with_streaming_response.patch(
             group_id="group_abc",
         ) as response:
             assert not response.is_closed
@@ -105,55 +149,11 @@ class TestGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_path_params_update(self, client: Everos) -> None:
+    def test_path_params_patch(self, client: EverOS) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `group_id` but received ''"):
-            client.v1.groups.with_raw_response.update(
+            client.v1.groups.with_raw_response.patch(
                 group_id="",
             )
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_method_create_or_update(self, client: Everos) -> None:
-        group = client.v1.groups.create_or_update(
-            group_id="group_abc",
-        )
-        assert_matches_type(GroupAPIResponse, group, path=["response"])
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_method_create_or_update_with_all_params(self, client: Everos) -> None:
-        group = client.v1.groups.create_or_update(
-            group_id="group_abc",
-            description="Weekly sync on Project X",
-            name="Project Discussion",
-        )
-        assert_matches_type(GroupAPIResponse, group, path=["response"])
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_raw_response_create_or_update(self, client: Everos) -> None:
-        response = client.v1.groups.with_raw_response.create_or_update(
-            group_id="group_abc",
-        )
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        group = response.parse()
-        assert_matches_type(GroupAPIResponse, group, path=["response"])
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_streaming_response_create_or_update(self, client: Everos) -> None:
-        with client.v1.groups.with_streaming_response.create_or_update(
-            group_id="group_abc",
-        ) as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            group = response.parse()
-            assert_matches_type(GroupAPIResponse, group, path=["response"])
-
-        assert cast(Any, response.is_closed) is True
 
 
 class TestAsyncGroups:
@@ -163,7 +163,51 @@ class TestAsyncGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_retrieve(self, async_client: AsyncEveros) -> None:
+    async def test_method_create(self, async_client: AsyncEverOS) -> None:
+        group = await async_client.v1.groups.create(
+            group_id="group_abc",
+        )
+        assert_matches_type(GroupAPIResponse, group, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_create_with_all_params(self, async_client: AsyncEverOS) -> None:
+        group = await async_client.v1.groups.create(
+            group_id="group_abc",
+            description="Weekly sync on Project X",
+            name="Project Discussion",
+        )
+        assert_matches_type(GroupAPIResponse, group, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_create(self, async_client: AsyncEverOS) -> None:
+        response = await async_client.v1.groups.with_raw_response.create(
+            group_id="group_abc",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        group = await response.parse()
+        assert_matches_type(GroupAPIResponse, group, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_create(self, async_client: AsyncEverOS) -> None:
+        async with async_client.v1.groups.with_streaming_response.create(
+            group_id="group_abc",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            group = await response.parse()
+            assert_matches_type(GroupAPIResponse, group, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_retrieve(self, async_client: AsyncEverOS) -> None:
         group = await async_client.v1.groups.retrieve(
             "group_abc",
         )
@@ -171,7 +215,7 @@ class TestAsyncGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_retrieve(self, async_client: AsyncEveros) -> None:
+    async def test_raw_response_retrieve(self, async_client: AsyncEverOS) -> None:
         response = await async_client.v1.groups.with_raw_response.retrieve(
             "group_abc",
         )
@@ -183,7 +227,7 @@ class TestAsyncGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_retrieve(self, async_client: AsyncEveros) -> None:
+    async def test_streaming_response_retrieve(self, async_client: AsyncEverOS) -> None:
         async with async_client.v1.groups.with_streaming_response.retrieve(
             "group_abc",
         ) as response:
@@ -197,7 +241,7 @@ class TestAsyncGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_path_params_retrieve(self, async_client: AsyncEveros) -> None:
+    async def test_path_params_retrieve(self, async_client: AsyncEverOS) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `group_id` but received ''"):
             await async_client.v1.groups.with_raw_response.retrieve(
                 "",
@@ -205,16 +249,16 @@ class TestAsyncGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_update(self, async_client: AsyncEveros) -> None:
-        group = await async_client.v1.groups.update(
+    async def test_method_patch(self, async_client: AsyncEverOS) -> None:
+        group = await async_client.v1.groups.patch(
             group_id="group_abc",
         )
         assert_matches_type(GroupAPIResponse, group, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_update_with_all_params(self, async_client: AsyncEveros) -> None:
-        group = await async_client.v1.groups.update(
+    async def test_method_patch_with_all_params(self, async_client: AsyncEverOS) -> None:
+        group = await async_client.v1.groups.patch(
             group_id="group_abc",
             description="description",
             name="name",
@@ -223,8 +267,8 @@ class TestAsyncGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_update(self, async_client: AsyncEveros) -> None:
-        response = await async_client.v1.groups.with_raw_response.update(
+    async def test_raw_response_patch(self, async_client: AsyncEverOS) -> None:
+        response = await async_client.v1.groups.with_raw_response.patch(
             group_id="group_abc",
         )
 
@@ -235,8 +279,8 @@ class TestAsyncGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_update(self, async_client: AsyncEveros) -> None:
-        async with async_client.v1.groups.with_streaming_response.update(
+    async def test_streaming_response_patch(self, async_client: AsyncEverOS) -> None:
+        async with async_client.v1.groups.with_streaming_response.patch(
             group_id="group_abc",
         ) as response:
             assert not response.is_closed
@@ -249,52 +293,8 @@ class TestAsyncGroups:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_path_params_update(self, async_client: AsyncEveros) -> None:
+    async def test_path_params_patch(self, async_client: AsyncEverOS) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `group_id` but received ''"):
-            await async_client.v1.groups.with_raw_response.update(
+            await async_client.v1.groups.with_raw_response.patch(
                 group_id="",
             )
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_method_create_or_update(self, async_client: AsyncEveros) -> None:
-        group = await async_client.v1.groups.create_or_update(
-            group_id="group_abc",
-        )
-        assert_matches_type(GroupAPIResponse, group, path=["response"])
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_method_create_or_update_with_all_params(self, async_client: AsyncEveros) -> None:
-        group = await async_client.v1.groups.create_or_update(
-            group_id="group_abc",
-            description="Weekly sync on Project X",
-            name="Project Discussion",
-        )
-        assert_matches_type(GroupAPIResponse, group, path=["response"])
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_raw_response_create_or_update(self, async_client: AsyncEveros) -> None:
-        response = await async_client.v1.groups.with_raw_response.create_or_update(
-            group_id="group_abc",
-        )
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        group = await response.parse()
-        assert_matches_type(GroupAPIResponse, group, path=["response"])
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_streaming_response_create_or_update(self, async_client: AsyncEveros) -> None:
-        async with async_client.v1.groups.with_streaming_response.create_or_update(
-            group_id="group_abc",
-        ) as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            group = await response.parse()
-            assert_matches_type(GroupAPIResponse, group, path=["response"])
-
-        assert cast(Any, response.is_closed) is True

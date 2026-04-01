@@ -1,11 +1,11 @@
 [project]
 name = "everos"
-version = "0.0.2"
-description = "The official Python library for the everos API"
+version = "0.0.1"
+description = "The official Python library for the EverOS API"
 dynamic = ["readme"]
 license = "Apache-2.0"
 authors = [
-{ name = "Everos", email = "" },
+{ name = "Ever OS", email = "" },
 ]
 
 dependencies = [

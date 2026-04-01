@@ -17,9 +17,10 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ...._base_client import make_request_options
-from ....types.v1.memories import agent_flush_params, agent_create_params
+from ....types.v1.memories import agent_add_params, agent_flush_params
 from ....types.v1.add_response import AddResponse
 from ....types.v1.flush_response import FlushResponse
+from ....types.v1.memories.agent_message_item_param import AgentMessageItemParam
 
 __all__ = ["AgentResource", "AsyncAgentResource"]
 
@@ -46,10 +47,10 @@ class AgentResource(SyncAPIResource):
         """
         return AgentResourceWithStreamingResponse(self)
 
-    def create(
+    def add(
         self,
         *,
-        messages: Iterable[agent_create_params.Message],
+        messages: Iterable[AgentMessageItemParam],
         user_id: str,
         async_mode: bool | Omit = omit,
         session_id: Optional[str] | Omit = omit,
@@ -92,7 +93,7 @@ class AgentResource(SyncAPIResource):
                     "async_mode": async_mode,
                     "session_id": session_id,
                 },
-                agent_create_params.AgentCreateParams,
+                agent_add_params.AgentAddParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -167,10 +168,10 @@ class AsyncAgentResource(AsyncAPIResource):
         """
         return AsyncAgentResourceWithStreamingResponse(self)
 
-    async def create(
+    async def add(
         self,
         *,
-        messages: Iterable[agent_create_params.Message],
+        messages: Iterable[AgentMessageItemParam],
         user_id: str,
         async_mode: bool | Omit = omit,
         session_id: Optional[str] | Omit = omit,
@@ -213,7 +214,7 @@ class AsyncAgentResource(AsyncAPIResource):
                     "async_mode": async_mode,
                     "session_id": session_id,
                 },
-                agent_create_params.AgentCreateParams,
+                agent_add_params.AgentAddParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -270,8 +271,8 @@ class AgentResourceWithRawResponse:
     def __init__(self, agent: AgentResource) -> None:
         self._agent = agent
 
-        self.create = to_raw_response_wrapper(
-            agent.create,
+        self.add = to_raw_response_wrapper(
+            agent.add,
         )
         self.flush = to_raw_response_wrapper(
             agent.flush,
@@ -282,8 +283,8 @@ class AsyncAgentResourceWithRawResponse:
     def __init__(self, agent: AsyncAgentResource) -> None:
         self._agent = agent
 
-        self.create = async_to_raw_response_wrapper(
-            agent.create,
+        self.add = async_to_raw_response_wrapper(
+            agent.add,
         )
         self.flush = async_to_raw_response_wrapper(
             agent.flush,
@@ -294,8 +295,8 @@ class AgentResourceWithStreamingResponse:
     def __init__(self, agent: AgentResource) -> None:
         self._agent = agent
 
-        self.create = to_streamed_response_wrapper(
-            agent.create,
+        self.add = to_streamed_response_wrapper(
+            agent.add,
         )
         self.flush = to_streamed_response_wrapper(
             agent.flush,
@@ -306,8 +307,8 @@ class AsyncAgentResourceWithStreamingResponse:
     def __init__(self, agent: AsyncAgentResource) -> None:
         self._agent = agent
 
-        self.create = async_to_streamed_response_wrapper(
-            agent.create,
+        self.add = async_to_streamed_response_wrapper(
+            agent.add,
         )
         self.flush = async_to_streamed_response_wrapper(
             agent.flush,

@@ -2,33 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Dict, Union, Iterable, Optional
+from typing import Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypedDict
 
 from ..content_item_param import ContentItemParam
 
-__all__ = ["GroupCreateParams", "Message"]
+__all__ = ["GroupMessageItemParam"]
 
 
-class GroupCreateParams(TypedDict, total=False):
-    group_id: Required[str]
-    """Group identifier"""
-
-    messages: Required[Iterable[Message]]
-    """Batch message array (1-500 items). sender_id is required per message."""
-
-    async_mode: bool
-    """Enable async processing.
-
-    When true, returns 202 with task_id; when false, processes synchronously and
-    returns 200.
-    """
-
-    group_meta: Optional[Dict[str, object]]
-    """Group metadata"""
-
-
-class Message(TypedDict, total=False):
+class GroupMessageItemParam(TypedDict, total=False):
     """Single message item for group memories.
 
     Each message must include sender_id to identify participants.
