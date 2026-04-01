@@ -1,23 +1,12 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 from typing import Optional
-from typing_extensions import Literal
 
 from ..._models import BaseModel
+from .flush_result import FlushResult
 
-__all__ = ["FlushResponse", "Data"]
-
-
-class Data(BaseModel):
-    message: Optional[str] = None
-    """Human-readable status description"""
-
-    request_id: Optional[str] = None
-    """Request tracking ID (reserved)"""
-
-    status: Optional[Literal["extracted", "no_extraction"]] = None
-    """Processing status"""
+__all__ = ["FlushResponse"]
 
 
 class FlushResponse(BaseModel):
-    data: Optional[Data] = None
+    data: Optional[FlushResult] = None

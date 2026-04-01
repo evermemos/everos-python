@@ -4,22 +4,21 @@ from typing import Dict, List, Optional
 from datetime import datetime
 
 from ..._models import BaseModel
+from .raw_message_dto import RawMessageDto
 
 __all__ = [
-    "MemorySearchResponse",
-    "Data",
-    "DataQuery",
-    "DataAgentMemory",
-    "DataAgentMemoryCase",
-    "DataAgentMemorySkill",
-    "DataEpisode",
-    "DataEpisodeAtomicFact",
-    "DataProfile",
-    "DataRawMessage",
+    "SearchMemoriesResponseData",
+    "Query",
+    "AgentMemory",
+    "AgentMemoryCase",
+    "AgentMemorySkill",
+    "Episode",
+    "EpisodeAtomicFact",
+    "Profile",
 ]
 
 
-class DataQuery(BaseModel):
+class Query(BaseModel):
     method: str
     """Retrieval method used"""
 
@@ -30,7 +29,7 @@ class DataQuery(BaseModel):
     """Filters applied"""
 
 
-class DataAgentMemoryCase(BaseModel):
+class AgentMemoryCase(BaseModel):
     """Agent case search result with relevance score"""
 
     id: str
@@ -67,7 +66,7 @@ class DataAgentMemoryCase(BaseModel):
     """User ID"""
 
 
-class DataAgentMemorySkill(BaseModel):
+class AgentMemorySkill(BaseModel):
     """Agent skill search result with relevance score"""
 
     id: str
@@ -104,17 +103,17 @@ class DataAgentMemorySkill(BaseModel):
     """User ID"""
 
 
-class DataAgentMemory(BaseModel):
+class AgentMemory(BaseModel):
     """Agent memory search results (cases + skills)"""
 
-    cases: Optional[List[DataAgentMemoryCase]] = None
+    cases: Optional[List[AgentMemoryCase]] = None
     """Agent case search results"""
 
-    skills: Optional[List[DataAgentMemorySkill]] = None
+    skills: Optional[List[AgentMemorySkill]] = None
     """Agent skill search results"""
 
 
-class DataEpisodeAtomicFact(BaseModel):
+class EpisodeAtomicFact(BaseModel):
     """Atomic fact expanded from an episode"""
 
     id: str
@@ -154,13 +153,13 @@ class DataEpisodeAtomicFact(BaseModel):
     """User ID"""
 
 
-class DataEpisode(BaseModel):
+class Episode(BaseModel):
     """Episode search result with relevance score"""
 
     id: str
     """MongoDB ObjectId as string"""
 
-    atomic_facts: Optional[List[DataEpisodeAtomicFact]] = None
+    atomic_facts: Optional[List[EpisodeAtomicFact]] = None
     """Atomic facts expanded from this episode"""
 
     episode: Optional[str] = None
@@ -200,7 +199,7 @@ class DataEpisode(BaseModel):
     """Owner user ID"""
 
 
-class DataProfile(BaseModel):
+class Profile(BaseModel):
     """Profile search result with relevance score"""
 
     id: str
@@ -225,63 +224,22 @@ class DataProfile(BaseModel):
     """User ID"""
 
 
-class DataRawMessage(BaseModel):
-    """Raw unprocessed message waiting for memory extraction"""
-
-    id: str
-    """MongoDB ObjectId as string"""
-
-    request_id: str
-    """Request ID"""
-
-    content_items: Optional[List[Dict[str, object]]] = None
-
-    created_at: Optional[str] = None
-    """ISO 8601 format"""
-
-    group_id: Optional[str] = None
-    """Group ID"""
-
-    message_id: Optional[str] = None
-    """Message ID"""
-
-    sender_id: Optional[str] = None
-    """Sender ID"""
-
-    sender_name: Optional[str] = None
-    """Sender name"""
-
-    session_id: Optional[str] = None
-    """Session identifier"""
-
-    timestamp: Optional[str] = None
-    """ISO 8601 format"""
-
-    updated_at: Optional[str] = None
-    """ISO 8601 format"""
-
-
-class Data(BaseModel):
+class SearchMemoriesResponseData(BaseModel):
     """Memory search result data"""
 
-    query: DataQuery
+    query: Query
 
-    agent_memory: Optional[DataAgentMemory] = None
+    agent_memory: Optional[AgentMemory] = None
     """Agent memory search results (cases + skills)"""
 
-    episodes: Optional[List[DataEpisode]] = None
+    episodes: Optional[List[Episode]] = None
     """Episodic memory search results"""
 
     original_data: Optional[Dict[str, object]] = None
     """Original data (if include_original_data=true)"""
 
-    profiles: Optional[List[DataProfile]] = None
+    profiles: Optional[List[Profile]] = None
     """Profile search results"""
 
-    raw_messages: Optional[List[DataRawMessage]] = None
+    raw_messages: Optional[List[RawMessageDto]] = None
     """Raw unprocessed messages (pending)"""
-
-
-class MemorySearchResponse(BaseModel):
-    data: Optional[Data] = None
-    """Memory search result data"""

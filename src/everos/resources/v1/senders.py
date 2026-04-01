@@ -9,7 +9,7 @@ import httpx
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import path_template, maybe_transform, async_maybe_transform
 from ..._compat import cached_property
-from ...types.v1 import sender_update_params, sender_create_or_update_params
+from ...types.v1 import sender_patch_params, sender_create_params
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
     to_raw_response_wrapper,
@@ -32,7 +32,7 @@ class SendersResource(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
         """
         return SendersResourceWithRawResponse(self)
 
@@ -41,81 +41,11 @@ class SendersResource(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
         """
         return SendersResourceWithStreamingResponse(self)
 
-    def retrieve(
-        self,
-        sender_id: str,
-        *,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SenderAPIResponse:
-        """
-        Retrieve a sender's details by its sender_id.
-
-        Args:
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        if not sender_id:
-            raise ValueError(f"Expected a non-empty value for `sender_id` but received {sender_id!r}")
-        return self._get(
-            path_template("/api/v1/senders/{sender_id}", sender_id=sender_id),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=SenderAPIResponse,
-        )
-
-    def update(
-        self,
-        sender_id: str,
-        *,
-        name: Optional[str] | Omit = omit,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SenderAPIResponse:
-        """
-        Update a sender's display name.
-
-        Args:
-          name: New sender display name
-
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        if not sender_id:
-            raise ValueError(f"Expected a non-empty value for `sender_id` but received {sender_id!r}")
-        return self._patch(
-            path_template("/api/v1/senders/{sender_id}", sender_id=sender_id),
-            body=maybe_transform({"name": name}, sender_update_params.SenderUpdateParams),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=SenderAPIResponse,
-        )
-
-    def create_or_update(
+    def create(
         self,
         *,
         sender_id: str,
@@ -150,7 +80,7 @@ class SendersResource(SyncAPIResource):
                     "sender_id": sender_id,
                     "name": name,
                 },
-                sender_create_or_update_params.SenderCreateOrUpdateParams,
+                sender_create_params.SenderCreateParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -158,30 +88,7 @@ class SendersResource(SyncAPIResource):
             cast_to=SenderAPIResponse,
         )
 
-
-class AsyncSendersResource(AsyncAPIResource):
-    """Sender resource CRUD operations"""
-
-    @cached_property
-    def with_raw_response(self) -> AsyncSendersResourceWithRawResponse:
-        """
-        This property can be used as a prefix for any HTTP method call to return
-        the raw response object instead of the parsed content.
-
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
-        """
-        return AsyncSendersResourceWithRawResponse(self)
-
-    @cached_property
-    def with_streaming_response(self) -> AsyncSendersResourceWithStreamingResponse:
-        """
-        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
-
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
-        """
-        return AsyncSendersResourceWithStreamingResponse(self)
-
-    async def retrieve(
+    def retrieve(
         self,
         sender_id: str,
         *,
@@ -206,7 +113,7 @@ class AsyncSendersResource(AsyncAPIResource):
         """
         if not sender_id:
             raise ValueError(f"Expected a non-empty value for `sender_id` but received {sender_id!r}")
-        return await self._get(
+        return self._get(
             path_template("/api/v1/senders/{sender_id}", sender_id=sender_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -214,7 +121,7 @@ class AsyncSendersResource(AsyncAPIResource):
             cast_to=SenderAPIResponse,
         )
 
-    async def update(
+    def patch(
         self,
         sender_id: str,
         *,
@@ -242,16 +149,39 @@ class AsyncSendersResource(AsyncAPIResource):
         """
         if not sender_id:
             raise ValueError(f"Expected a non-empty value for `sender_id` but received {sender_id!r}")
-        return await self._patch(
+        return self._patch(
             path_template("/api/v1/senders/{sender_id}", sender_id=sender_id),
-            body=await async_maybe_transform({"name": name}, sender_update_params.SenderUpdateParams),
+            body=maybe_transform({"name": name}, sender_patch_params.SenderPatchParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=SenderAPIResponse,
         )
 
-    async def create_or_update(
+
+class AsyncSendersResource(AsyncAPIResource):
+    """Sender resource CRUD operations"""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncSendersResourceWithRawResponse:
+        """
+        This property can be used as a prefix for any HTTP method call to return
+        the raw response object instead of the parsed content.
+
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
+        """
+        return AsyncSendersResourceWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> AsyncSendersResourceWithStreamingResponse:
+        """
+        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
+
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
+        """
+        return AsyncSendersResourceWithStreamingResponse(self)
+
+    async def create(
         self,
         *,
         sender_id: str,
@@ -286,8 +216,78 @@ class AsyncSendersResource(AsyncAPIResource):
                     "sender_id": sender_id,
                     "name": name,
                 },
-                sender_create_or_update_params.SenderCreateOrUpdateParams,
+                sender_create_params.SenderCreateParams,
             ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=SenderAPIResponse,
+        )
+
+    async def retrieve(
+        self,
+        sender_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> SenderAPIResponse:
+        """
+        Retrieve a sender's details by its sender_id.
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not sender_id:
+            raise ValueError(f"Expected a non-empty value for `sender_id` but received {sender_id!r}")
+        return await self._get(
+            path_template("/api/v1/senders/{sender_id}", sender_id=sender_id),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=SenderAPIResponse,
+        )
+
+    async def patch(
+        self,
+        sender_id: str,
+        *,
+        name: Optional[str] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> SenderAPIResponse:
+        """
+        Update a sender's display name.
+
+        Args:
+          name: New sender display name
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not sender_id:
+            raise ValueError(f"Expected a non-empty value for `sender_id` but received {sender_id!r}")
+        return await self._patch(
+            path_template("/api/v1/senders/{sender_id}", sender_id=sender_id),
+            body=await async_maybe_transform({"name": name}, sender_patch_params.SenderPatchParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -299,14 +299,14 @@ class SendersResourceWithRawResponse:
     def __init__(self, senders: SendersResource) -> None:
         self._senders = senders
 
+        self.create = to_raw_response_wrapper(
+            senders.create,
+        )
         self.retrieve = to_raw_response_wrapper(
             senders.retrieve,
         )
-        self.update = to_raw_response_wrapper(
-            senders.update,
-        )
-        self.create_or_update = to_raw_response_wrapper(
-            senders.create_or_update,
+        self.patch = to_raw_response_wrapper(
+            senders.patch,
         )
 
 
@@ -314,14 +314,14 @@ class AsyncSendersResourceWithRawResponse:
     def __init__(self, senders: AsyncSendersResource) -> None:
         self._senders = senders
 
+        self.create = async_to_raw_response_wrapper(
+            senders.create,
+        )
         self.retrieve = async_to_raw_response_wrapper(
             senders.retrieve,
         )
-        self.update = async_to_raw_response_wrapper(
-            senders.update,
-        )
-        self.create_or_update = async_to_raw_response_wrapper(
-            senders.create_or_update,
+        self.patch = async_to_raw_response_wrapper(
+            senders.patch,
         )
 
 
@@ -329,14 +329,14 @@ class SendersResourceWithStreamingResponse:
     def __init__(self, senders: SendersResource) -> None:
         self._senders = senders
 
+        self.create = to_streamed_response_wrapper(
+            senders.create,
+        )
         self.retrieve = to_streamed_response_wrapper(
             senders.retrieve,
         )
-        self.update = to_streamed_response_wrapper(
-            senders.update,
-        )
-        self.create_or_update = to_streamed_response_wrapper(
-            senders.create_or_update,
+        self.patch = to_streamed_response_wrapper(
+            senders.patch,
         )
 
 
@@ -344,12 +344,12 @@ class AsyncSendersResourceWithStreamingResponse:
     def __init__(self, senders: AsyncSendersResource) -> None:
         self._senders = senders
 
+        self.create = async_to_streamed_response_wrapper(
+            senders.create,
+        )
         self.retrieve = async_to_streamed_response_wrapper(
             senders.retrieve,
         )
-        self.update = async_to_streamed_response_wrapper(
-            senders.update,
-        )
-        self.create_or_update = async_to_streamed_response_wrapper(
-            senders.create_or_update,
+        self.patch = async_to_streamed_response_wrapper(
+            senders.patch,
         )

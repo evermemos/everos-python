@@ -17,9 +17,10 @@ from ...._response import (
     async_to_streamed_response_wrapper,
 )
 from ...._base_client import make_request_options
-from ....types.v1.memories import group_flush_params, group_create_params
+from ....types.v1.memories import group_add_params, group_flush_params
 from ....types.v1.add_response import AddResponse
 from ....types.v1.flush_response import FlushResponse
+from ....types.v1.memories.group_message_item_param import GroupMessageItemParam
 
 __all__ = ["GroupResource", "AsyncGroupResource"]
 
@@ -33,7 +34,7 @@ class GroupResource(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
         """
         return GroupResourceWithRawResponse(self)
 
@@ -42,15 +43,15 @@ class GroupResource(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
         """
         return GroupResourceWithStreamingResponse(self)
 
-    def create(
+    def add(
         self,
         *,
         group_id: str,
-        messages: Iterable[group_create_params.Message],
+        messages: Iterable[GroupMessageItemParam],
         async_mode: bool | Omit = omit,
         group_meta: Optional[Dict[str, object]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -92,7 +93,7 @@ class GroupResource(SyncAPIResource):
                     "async_mode": async_mode,
                     "group_meta": group_meta,
                 },
-                group_create_params.GroupCreateParams,
+                group_add_params.GroupAddParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -144,7 +145,7 @@ class AsyncGroupResource(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
         """
         return AsyncGroupResourceWithRawResponse(self)
 
@@ -153,15 +154,15 @@ class AsyncGroupResource(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
         """
         return AsyncGroupResourceWithStreamingResponse(self)
 
-    async def create(
+    async def add(
         self,
         *,
         group_id: str,
-        messages: Iterable[group_create_params.Message],
+        messages: Iterable[GroupMessageItemParam],
         async_mode: bool | Omit = omit,
         group_meta: Optional[Dict[str, object]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -203,7 +204,7 @@ class AsyncGroupResource(AsyncAPIResource):
                     "async_mode": async_mode,
                     "group_meta": group_meta,
                 },
-                group_create_params.GroupCreateParams,
+                group_add_params.GroupAddParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -250,8 +251,8 @@ class GroupResourceWithRawResponse:
     def __init__(self, group: GroupResource) -> None:
         self._group = group
 
-        self.create = to_raw_response_wrapper(
-            group.create,
+        self.add = to_raw_response_wrapper(
+            group.add,
         )
         self.flush = to_raw_response_wrapper(
             group.flush,
@@ -262,8 +263,8 @@ class AsyncGroupResourceWithRawResponse:
     def __init__(self, group: AsyncGroupResource) -> None:
         self._group = group
 
-        self.create = async_to_raw_response_wrapper(
-            group.create,
+        self.add = async_to_raw_response_wrapper(
+            group.add,
         )
         self.flush = async_to_raw_response_wrapper(
             group.flush,
@@ -274,8 +275,8 @@ class GroupResourceWithStreamingResponse:
     def __init__(self, group: GroupResource) -> None:
         self._group = group
 
-        self.create = to_streamed_response_wrapper(
-            group.create,
+        self.add = to_streamed_response_wrapper(
+            group.add,
         )
         self.flush = to_streamed_response_wrapper(
             group.flush,
@@ -286,8 +287,8 @@ class AsyncGroupResourceWithStreamingResponse:
     def __init__(self, group: AsyncGroupResource) -> None:
         self._group = group
 
-        self.create = async_to_streamed_response_wrapper(
-            group.create,
+        self.add = async_to_streamed_response_wrapper(
+            group.add,
         )
         self.flush = async_to_streamed_response_wrapper(
             group.flush,

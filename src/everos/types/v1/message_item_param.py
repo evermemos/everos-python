@@ -7,28 +7,10 @@ from typing_extensions import Literal, Required, TypedDict
 
 from .content_item_param import ContentItemParam
 
-__all__ = ["MemoryCreateParams", "Message"]
+__all__ = ["MessageItemParam"]
 
 
-class MemoryCreateParams(TypedDict, total=False):
-    messages: Required[Iterable[Message]]
-    """Batch message array (1-500 items)"""
-
-    user_id: Required[str]
-    """Owner user ID"""
-
-    async_mode: bool
-    """Enable async processing.
-
-    When true, returns 202 with task_id; when false, processes synchronously and
-    returns 200.
-    """
-
-    session_id: Optional[str]
-    """Session identifier"""
-
-
-class Message(TypedDict, total=False):
+class MessageItemParam(TypedDict, total=False):
     """Single message item for personal memories.
 
     Content accepts a plain string shorthand: "hello" is coerced to [{"type": "text", "text": "hello"}].

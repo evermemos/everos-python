@@ -3,23 +3,10 @@
 from typing import Optional
 
 from ..._models import BaseModel
+from .sender_response import SenderResponse
 
-__all__ = ["SenderAPIResponse", "Data"]
-
-
-class Data(BaseModel):
-    created_at: str
-    """Creation time (ISO 8601)"""
-
-    sender_id: str
-    """Sender identifier"""
-
-    updated_at: str
-    """Last update time (ISO 8601)"""
-
-    name: Optional[str] = None
-    """Sender display name"""
+__all__ = ["SenderAPIResponse"]
 
 
 class SenderAPIResponse(BaseModel):
-    data: Optional[Data] = None
+    data: Optional[SenderResponse] = None
