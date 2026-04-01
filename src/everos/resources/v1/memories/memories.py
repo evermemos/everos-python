@@ -69,7 +69,7 @@ class MemoriesResource(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
         """
         return MemoriesResourceWithRawResponse(self)
 
@@ -78,7 +78,7 @@ class MemoriesResource(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
         """
         return MemoriesResourceWithStreamingResponse(self)
 
@@ -436,7 +436,7 @@ class AsyncMemoriesResource(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
         """
         return AsyncMemoriesResourceWithRawResponse(self)
 
@@ -445,7 +445,7 @@ class AsyncMemoriesResource(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
         """
         return AsyncMemoriesResourceWithStreamingResponse(self)
 
