@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import Required, TypedDict
 
-__all__ = ["GroupCreateOrUpdateParams"]
+__all__ = ["GroupCreateParams"]
 
 
-class GroupCreateOrUpdateParams(TypedDict, total=False):
+class GroupCreateParams(TypedDict, total=False):
     group_id: Required[str]
     """Group identifier (unique)"""
 

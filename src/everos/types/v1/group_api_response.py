@@ -3,26 +3,10 @@
 from typing import Optional
 
 from ..._models import BaseModel
+from .group_response import GroupResponse
 
-__all__ = ["GroupAPIResponse", "Data"]
-
-
-class Data(BaseModel):
-    created_at: str
-    """Creation time (ISO 8601)"""
-
-    group_id: str
-    """Group identifier"""
-
-    updated_at: str
-    """Last update time (ISO 8601)"""
-
-    description: Optional[str] = None
-    """Group description"""
-
-    name: Optional[str] = None
-    """Group display name"""
+__all__ = ["GroupAPIResponse"]
 
 
 class GroupAPIResponse(BaseModel):
-    data: Optional[Data] = None
+    data: Optional[GroupResponse] = None

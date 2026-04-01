@@ -1,34 +1,12 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Dict, Optional
+from typing import Optional
 
 from ..._models import BaseModel
+from .settings_response import SettingsResponse
 
-__all__ = ["SettingsAPIResponse", "Data"]
-
-
-class Data(BaseModel):
-    boundary_detection_timeout: int
-    """MemCell auto-flush idle timeout in seconds"""
-
-    created_at: str
-    """Creation time (ISO 8601)"""
-
-    extraction_mode: str
-    """Extraction mode"""
-
-    offline_profile_extraction_interval: int
-    """Offline profile extraction interval in seconds"""
-
-    timezone: str
-    """IANA timezone identifier"""
-
-    updated_at: str
-    """Last update time (ISO 8601)"""
-
-    llm_custom_setting: Optional[Dict[str, object]] = None
-    """LLM custom settings (serialized)"""
+__all__ = ["SettingsAPIResponse"]
 
 
 class SettingsAPIResponse(BaseModel):
-    data: Optional[Data] = None
+    data: Optional[SettingsResponse] = None

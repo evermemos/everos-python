@@ -9,7 +9,7 @@ import httpx
 from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ..._utils import path_template, maybe_transform, async_maybe_transform
 from ..._compat import cached_property
-from ...types.v1 import group_update_params, group_create_or_update_params
+from ...types.v1 import group_patch_params, group_create_params
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
     to_raw_response_wrapper,
@@ -32,7 +32,7 @@ class GroupsResource(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
         """
         return GroupsResourceWithRawResponse(self)
 
@@ -41,9 +41,56 @@ class GroupsResource(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
         """
         return GroupsResourceWithStreamingResponse(self)
+
+    def create(
+        self,
+        *,
+        group_id: str,
+        description: Optional[str] | Omit = omit,
+        name: Optional[str] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> GroupAPIResponse:
+        """
+        Create a new group or update an existing one (upsert by group_id).
+
+        Args:
+          group_id: Group identifier (unique)
+
+          description: Group description
+
+          name: Group display name
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._post(
+            "/api/v1/groups",
+            body=maybe_transform(
+                {
+                    "group_id": group_id,
+                    "description": description,
+                    "name": name,
+                },
+                group_create_params.GroupCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=GroupAPIResponse,
+        )
 
     def retrieve(
         self,
@@ -78,7 +125,7 @@ class GroupsResource(SyncAPIResource):
             cast_to=GroupAPIResponse,
         )
 
-    def update(
+    def patch(
         self,
         group_id: str,
         *,
@@ -118,7 +165,7 @@ class GroupsResource(SyncAPIResource):
                     "description": description,
                     "name": name,
                 },
-                group_update_params.GroupUpdateParams,
+                group_patch_params.GroupPatchParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -126,7 +173,30 @@ class GroupsResource(SyncAPIResource):
             cast_to=GroupAPIResponse,
         )
 
-    def create_or_update(
+
+class AsyncGroupsResource(AsyncAPIResource):
+    """Group resource CRUD operations"""
+
+    @cached_property
+    def with_raw_response(self) -> AsyncGroupsResourceWithRawResponse:
+        """
+        This property can be used as a prefix for any HTTP method call to return
+        the raw response object instead of the parsed content.
+
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
+        """
+        return AsyncGroupsResourceWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> AsyncGroupsResourceWithStreamingResponse:
+        """
+        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
+
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
+        """
+        return AsyncGroupsResourceWithStreamingResponse(self)
+
+    async def create(
         self,
         *,
         group_id: str,
@@ -157,44 +227,21 @@ class GroupsResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return self._post(
+        return await self._post(
             "/api/v1/groups",
-            body=maybe_transform(
+            body=await async_maybe_transform(
                 {
                     "group_id": group_id,
                     "description": description,
                     "name": name,
                 },
-                group_create_or_update_params.GroupCreateOrUpdateParams,
+                group_create_params.GroupCreateParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=GroupAPIResponse,
         )
-
-
-class AsyncGroupsResource(AsyncAPIResource):
-    """Group resource CRUD operations"""
-
-    @cached_property
-    def with_raw_response(self) -> AsyncGroupsResourceWithRawResponse:
-        """
-        This property can be used as a prefix for any HTTP method call to return
-        the raw response object instead of the parsed content.
-
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
-        """
-        return AsyncGroupsResourceWithRawResponse(self)
-
-    @cached_property
-    def with_streaming_response(self) -> AsyncGroupsResourceWithStreamingResponse:
-        """
-        An alternative to `.with_raw_response` that doesn't eagerly read the response body.
-
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
-        """
-        return AsyncGroupsResourceWithStreamingResponse(self)
 
     async def retrieve(
         self,
@@ -229,7 +276,7 @@ class AsyncGroupsResource(AsyncAPIResource):
             cast_to=GroupAPIResponse,
         )
 
-    async def update(
+    async def patch(
         self,
         group_id: str,
         *,
@@ -269,54 +316,7 @@ class AsyncGroupsResource(AsyncAPIResource):
                     "description": description,
                     "name": name,
                 },
-                group_update_params.GroupUpdateParams,
-            ),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=GroupAPIResponse,
-        )
-
-    async def create_or_update(
-        self,
-        *,
-        group_id: str,
-        description: Optional[str] | Omit = omit,
-        name: Optional[str] | Omit = omit,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> GroupAPIResponse:
-        """
-        Create a new group or update an existing one (upsert by group_id).
-
-        Args:
-          group_id: Group identifier (unique)
-
-          description: Group description
-
-          name: Group display name
-
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        return await self._post(
-            "/api/v1/groups",
-            body=await async_maybe_transform(
-                {
-                    "group_id": group_id,
-                    "description": description,
-                    "name": name,
-                },
-                group_create_or_update_params.GroupCreateOrUpdateParams,
+                group_patch_params.GroupPatchParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -329,14 +329,14 @@ class GroupsResourceWithRawResponse:
     def __init__(self, groups: GroupsResource) -> None:
         self._groups = groups
 
+        self.create = to_raw_response_wrapper(
+            groups.create,
+        )
         self.retrieve = to_raw_response_wrapper(
             groups.retrieve,
         )
-        self.update = to_raw_response_wrapper(
-            groups.update,
-        )
-        self.create_or_update = to_raw_response_wrapper(
-            groups.create_or_update,
+        self.patch = to_raw_response_wrapper(
+            groups.patch,
         )
 
 
@@ -344,14 +344,14 @@ class AsyncGroupsResourceWithRawResponse:
     def __init__(self, groups: AsyncGroupsResource) -> None:
         self._groups = groups
 
+        self.create = async_to_raw_response_wrapper(
+            groups.create,
+        )
         self.retrieve = async_to_raw_response_wrapper(
             groups.retrieve,
         )
-        self.update = async_to_raw_response_wrapper(
-            groups.update,
-        )
-        self.create_or_update = async_to_raw_response_wrapper(
-            groups.create_or_update,
+        self.patch = async_to_raw_response_wrapper(
+            groups.patch,
         )
 
 
@@ -359,14 +359,14 @@ class GroupsResourceWithStreamingResponse:
     def __init__(self, groups: GroupsResource) -> None:
         self._groups = groups
 
+        self.create = to_streamed_response_wrapper(
+            groups.create,
+        )
         self.retrieve = to_streamed_response_wrapper(
             groups.retrieve,
         )
-        self.update = to_streamed_response_wrapper(
-            groups.update,
-        )
-        self.create_or_update = to_streamed_response_wrapper(
-            groups.create_or_update,
+        self.patch = to_streamed_response_wrapper(
+            groups.patch,
         )
 
 
@@ -374,12 +374,12 @@ class AsyncGroupsResourceWithStreamingResponse:
     def __init__(self, groups: AsyncGroupsResource) -> None:
         self._groups = groups
 
+        self.create = async_to_streamed_response_wrapper(
+            groups.create,
+        )
         self.retrieve = async_to_streamed_response_wrapper(
             groups.retrieve,
         )
-        self.update = async_to_streamed_response_wrapper(
-            groups.update,
-        )
-        self.create_or_update = async_to_streamed_response_wrapper(
-            groups.create_or_update,
+        self.patch = async_to_streamed_response_wrapper(
+            groups.patch,
         )

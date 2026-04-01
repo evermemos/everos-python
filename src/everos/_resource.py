@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING
 import anyio
 
 if TYPE_CHECKING:
-    from ._client import Everos, AsyncEveros
+    from ._client import EverOS, AsyncEverOS
 
 
 class SyncAPIResource:
-    _client: Everos
+    _client: EverOS
 
-    def __init__(self, client: Everos) -> None:
+    def __init__(self, client: EverOS) -> None:
         self._client = client
         self._get = client.get
         self._post = client.post
@@ -28,9 +28,9 @@ class SyncAPIResource:
 
 
 class AsyncAPIResource:
-    _client: AsyncEveros
+    _client: AsyncEverOS
 
-    def __init__(self, client: AsyncEveros) -> None:
+    def __init__(self, client: AsyncEverOS) -> None:
         self._client = client
         self._get = client.get
         self._post = client.post

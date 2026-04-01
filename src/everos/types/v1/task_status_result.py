@@ -2,18 +2,14 @@
 
 from typing_extensions import Literal
 
-from .._models import BaseModel
+from ..._models import BaseModel
 
-__all__ = ["V1QueryTaskStatusResponse", "Data"]
+__all__ = ["TaskStatusResult"]
 
 
-class Data(BaseModel):
+class TaskStatusResult(BaseModel):
     status: Literal["processing", "success", "failed"]
     """Task status"""
 
     task_id: str
     """Async task tracking ID"""
-
-
-class V1QueryTaskStatusResponse(BaseModel):
-    data: Data

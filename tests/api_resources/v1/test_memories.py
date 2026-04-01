@@ -7,13 +7,13 @@ from typing import Any, cast
 
 import pytest
 
-from everos import Everos, AsyncEveros
+from everos import EverOS, AsyncEverOS
 from tests.utils import assert_matches_type
 from everos.types.v1 import (
     AddResponse,
     FlushResponse,
-    MemoryGetResponse,
-    MemorySearchResponse,
+    GetMemoriesResponse,
+    SearchMemoriesResponse,
 )
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -24,8 +24,48 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_create(self, client: Everos) -> None:
-        memory = client.v1.memories.create(
+    def test_method_delete(self, client: EverOS) -> None:
+        memory = client.v1.memories.delete()
+        assert memory is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_delete_with_all_params(self, client: EverOS) -> None:
+        memory = client.v1.memories.delete(
+            group_id="group_id",
+            memory_id="memory_id",
+            sender_id="sender_id",
+            session_id="session_id",
+            user_id="user_id",
+        )
+        assert memory is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_delete(self, client: EverOS) -> None:
+        response = client.v1.memories.with_raw_response.delete()
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        memory = response.parse()
+        assert memory is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_delete(self, client: EverOS) -> None:
+        with client.v1.memories.with_streaming_response.delete() as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            memory = response.parse()
+            assert memory is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_add(self, client: EverOS) -> None:
+        memory = client.v1.memories.add(
             messages=[
                 {
                     "content": "x",
@@ -39,8 +79,8 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_create_with_all_params(self, client: Everos) -> None:
-        memory = client.v1.memories.create(
+    def test_method_add_with_all_params(self, client: EverOS) -> None:
+        memory = client.v1.memories.add(
             messages=[
                 {
                     "content": "x",
@@ -57,8 +97,8 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_create(self, client: Everos) -> None:
-        response = client.v1.memories.with_raw_response.create(
+    def test_raw_response_add(self, client: EverOS) -> None:
+        response = client.v1.memories.with_raw_response.add(
             messages=[
                 {
                     "content": "x",
@@ -76,8 +116,8 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_create(self, client: Everos) -> None:
-        with client.v1.memories.with_streaming_response.create(
+    def test_streaming_response_add(self, client: EverOS) -> None:
+        with client.v1.memories.with_streaming_response.add(
             messages=[
                 {
                     "content": "x",
@@ -97,47 +137,7 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_delete(self, client: Everos) -> None:
-        memory = client.v1.memories.delete()
-        assert memory is None
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_method_delete_with_all_params(self, client: Everos) -> None:
-        memory = client.v1.memories.delete(
-            group_id="group_id",
-            memory_id="memory_id",
-            sender_id="sender_id",
-            session_id="session_id",
-            user_id="user_id",
-        )
-        assert memory is None
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_raw_response_delete(self, client: Everos) -> None:
-        response = client.v1.memories.with_raw_response.delete()
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory = response.parse()
-        assert memory is None
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_streaming_response_delete(self, client: Everos) -> None:
-        with client.v1.memories.with_streaming_response.delete() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            memory = response.parse()
-            assert memory is None
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_method_flush(self, client: Everos) -> None:
+    def test_method_flush(self, client: EverOS) -> None:
         memory = client.v1.memories.flush(
             user_id="user_id",
         )
@@ -145,7 +145,7 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_flush_with_all_params(self, client: Everos) -> None:
+    def test_method_flush_with_all_params(self, client: EverOS) -> None:
         memory = client.v1.memories.flush(
             user_id="user_id",
             session_id="session_id",
@@ -154,7 +154,7 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_flush(self, client: Everos) -> None:
+    def test_raw_response_flush(self, client: EverOS) -> None:
         response = client.v1.memories.with_raw_response.flush(
             user_id="user_id",
         )
@@ -166,7 +166,7 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_flush(self, client: Everos) -> None:
+    def test_streaming_response_flush(self, client: EverOS) -> None:
         with client.v1.memories.with_streaming_response.flush(
             user_id="user_id",
         ) as response:
@@ -180,16 +180,16 @@ class TestMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_get(self, client: Everos) -> None:
+    def test_method_get(self, client: EverOS) -> None:
         memory = client.v1.memories.get(
             filters={"foo": "bar"},
             memory_type="episodic_memory",
         )
-        assert_matches_type(MemoryGetResponse, memory, path=["response"])
+        assert_matches_type(GetMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_get_with_all_params(self, client: Everos) -> None:
+    def test_method_get_with_all_params(self, client: EverOS) -> None:
         memory = client.v1.memories.get(
             filters={"foo": "bar"},
             memory_type="episodic_memory",
@@ -198,11 +198,11 @@ class TestMemories:
             rank_by="rank_by",
             rank_order="asc",
         )
-        assert_matches_type(MemoryGetResponse, memory, path=["response"])
+        assert_matches_type(GetMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_get(self, client: Everos) -> None:
+    def test_raw_response_get(self, client: EverOS) -> None:
         response = client.v1.memories.with_raw_response.get(
             filters={"foo": "bar"},
             memory_type="episodic_memory",
@@ -211,11 +211,11 @@ class TestMemories:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         memory = response.parse()
-        assert_matches_type(MemoryGetResponse, memory, path=["response"])
+        assert_matches_type(GetMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_get(self, client: Everos) -> None:
+    def test_streaming_response_get(self, client: EverOS) -> None:
         with client.v1.memories.with_streaming_response.get(
             filters={"foo": "bar"},
             memory_type="episodic_memory",
@@ -224,22 +224,22 @@ class TestMemories:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             memory = response.parse()
-            assert_matches_type(MemoryGetResponse, memory, path=["response"])
+            assert_matches_type(GetMemoriesResponse, memory, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_search(self, client: Everos) -> None:
+    def test_method_search(self, client: EverOS) -> None:
         memory = client.v1.memories.search(
             filters={"foo": "bar"},
             query="What did Alice say about the project?",
         )
-        assert_matches_type(MemorySearchResponse, memory, path=["response"])
+        assert_matches_type(SearchMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_search_with_all_params(self, client: Everos) -> None:
+    def test_method_search_with_all_params(self, client: EverOS) -> None:
         memory = client.v1.memories.search(
             filters={"foo": "bar"},
             query="What did Alice say about the project?",
@@ -249,11 +249,11 @@ class TestMemories:
             radius=0,
             top_k=-1,
         )
-        assert_matches_type(MemorySearchResponse, memory, path=["response"])
+        assert_matches_type(SearchMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_search(self, client: Everos) -> None:
+    def test_raw_response_search(self, client: EverOS) -> None:
         response = client.v1.memories.with_raw_response.search(
             filters={"foo": "bar"},
             query="What did Alice say about the project?",
@@ -262,11 +262,11 @@ class TestMemories:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         memory = response.parse()
-        assert_matches_type(MemorySearchResponse, memory, path=["response"])
+        assert_matches_type(SearchMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_search(self, client: Everos) -> None:
+    def test_streaming_response_search(self, client: EverOS) -> None:
         with client.v1.memories.with_streaming_response.search(
             filters={"foo": "bar"},
             query="What did Alice say about the project?",
@@ -275,7 +275,7 @@ class TestMemories:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             memory = response.parse()
-            assert_matches_type(MemorySearchResponse, memory, path=["response"])
+            assert_matches_type(SearchMemoriesResponse, memory, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -287,8 +287,48 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_create(self, async_client: AsyncEveros) -> None:
-        memory = await async_client.v1.memories.create(
+    async def test_method_delete(self, async_client: AsyncEverOS) -> None:
+        memory = await async_client.v1.memories.delete()
+        assert memory is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_delete_with_all_params(self, async_client: AsyncEverOS) -> None:
+        memory = await async_client.v1.memories.delete(
+            group_id="group_id",
+            memory_id="memory_id",
+            sender_id="sender_id",
+            session_id="session_id",
+            user_id="user_id",
+        )
+        assert memory is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_delete(self, async_client: AsyncEverOS) -> None:
+        response = await async_client.v1.memories.with_raw_response.delete()
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        memory = await response.parse()
+        assert memory is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_delete(self, async_client: AsyncEverOS) -> None:
+        async with async_client.v1.memories.with_streaming_response.delete() as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            memory = await response.parse()
+            assert memory is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_add(self, async_client: AsyncEverOS) -> None:
+        memory = await async_client.v1.memories.add(
             messages=[
                 {
                     "content": "x",
@@ -302,8 +342,8 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_create_with_all_params(self, async_client: AsyncEveros) -> None:
-        memory = await async_client.v1.memories.create(
+    async def test_method_add_with_all_params(self, async_client: AsyncEverOS) -> None:
+        memory = await async_client.v1.memories.add(
             messages=[
                 {
                     "content": "x",
@@ -320,8 +360,8 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_create(self, async_client: AsyncEveros) -> None:
-        response = await async_client.v1.memories.with_raw_response.create(
+    async def test_raw_response_add(self, async_client: AsyncEverOS) -> None:
+        response = await async_client.v1.memories.with_raw_response.add(
             messages=[
                 {
                     "content": "x",
@@ -339,8 +379,8 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_create(self, async_client: AsyncEveros) -> None:
-        async with async_client.v1.memories.with_streaming_response.create(
+    async def test_streaming_response_add(self, async_client: AsyncEverOS) -> None:
+        async with async_client.v1.memories.with_streaming_response.add(
             messages=[
                 {
                     "content": "x",
@@ -360,47 +400,7 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_delete(self, async_client: AsyncEveros) -> None:
-        memory = await async_client.v1.memories.delete()
-        assert memory is None
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_method_delete_with_all_params(self, async_client: AsyncEveros) -> None:
-        memory = await async_client.v1.memories.delete(
-            group_id="group_id",
-            memory_id="memory_id",
-            sender_id="sender_id",
-            session_id="session_id",
-            user_id="user_id",
-        )
-        assert memory is None
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_raw_response_delete(self, async_client: AsyncEveros) -> None:
-        response = await async_client.v1.memories.with_raw_response.delete()
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        memory = await response.parse()
-        assert memory is None
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_streaming_response_delete(self, async_client: AsyncEveros) -> None:
-        async with async_client.v1.memories.with_streaming_response.delete() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            memory = await response.parse()
-            assert memory is None
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_method_flush(self, async_client: AsyncEveros) -> None:
+    async def test_method_flush(self, async_client: AsyncEverOS) -> None:
         memory = await async_client.v1.memories.flush(
             user_id="user_id",
         )
@@ -408,7 +408,7 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_flush_with_all_params(self, async_client: AsyncEveros) -> None:
+    async def test_method_flush_with_all_params(self, async_client: AsyncEverOS) -> None:
         memory = await async_client.v1.memories.flush(
             user_id="user_id",
             session_id="session_id",
@@ -417,7 +417,7 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_flush(self, async_client: AsyncEveros) -> None:
+    async def test_raw_response_flush(self, async_client: AsyncEverOS) -> None:
         response = await async_client.v1.memories.with_raw_response.flush(
             user_id="user_id",
         )
@@ -429,7 +429,7 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_flush(self, async_client: AsyncEveros) -> None:
+    async def test_streaming_response_flush(self, async_client: AsyncEverOS) -> None:
         async with async_client.v1.memories.with_streaming_response.flush(
             user_id="user_id",
         ) as response:
@@ -443,16 +443,16 @@ class TestAsyncMemories:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_get(self, async_client: AsyncEveros) -> None:
+    async def test_method_get(self, async_client: AsyncEverOS) -> None:
         memory = await async_client.v1.memories.get(
             filters={"foo": "bar"},
             memory_type="episodic_memory",
         )
-        assert_matches_type(MemoryGetResponse, memory, path=["response"])
+        assert_matches_type(GetMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_get_with_all_params(self, async_client: AsyncEveros) -> None:
+    async def test_method_get_with_all_params(self, async_client: AsyncEverOS) -> None:
         memory = await async_client.v1.memories.get(
             filters={"foo": "bar"},
             memory_type="episodic_memory",
@@ -461,11 +461,11 @@ class TestAsyncMemories:
             rank_by="rank_by",
             rank_order="asc",
         )
-        assert_matches_type(MemoryGetResponse, memory, path=["response"])
+        assert_matches_type(GetMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_get(self, async_client: AsyncEveros) -> None:
+    async def test_raw_response_get(self, async_client: AsyncEverOS) -> None:
         response = await async_client.v1.memories.with_raw_response.get(
             filters={"foo": "bar"},
             memory_type="episodic_memory",
@@ -474,11 +474,11 @@ class TestAsyncMemories:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         memory = await response.parse()
-        assert_matches_type(MemoryGetResponse, memory, path=["response"])
+        assert_matches_type(GetMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_get(self, async_client: AsyncEveros) -> None:
+    async def test_streaming_response_get(self, async_client: AsyncEverOS) -> None:
         async with async_client.v1.memories.with_streaming_response.get(
             filters={"foo": "bar"},
             memory_type="episodic_memory",
@@ -487,22 +487,22 @@ class TestAsyncMemories:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             memory = await response.parse()
-            assert_matches_type(MemoryGetResponse, memory, path=["response"])
+            assert_matches_type(GetMemoriesResponse, memory, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_search(self, async_client: AsyncEveros) -> None:
+    async def test_method_search(self, async_client: AsyncEverOS) -> None:
         memory = await async_client.v1.memories.search(
             filters={"foo": "bar"},
             query="What did Alice say about the project?",
         )
-        assert_matches_type(MemorySearchResponse, memory, path=["response"])
+        assert_matches_type(SearchMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_search_with_all_params(self, async_client: AsyncEveros) -> None:
+    async def test_method_search_with_all_params(self, async_client: AsyncEverOS) -> None:
         memory = await async_client.v1.memories.search(
             filters={"foo": "bar"},
             query="What did Alice say about the project?",
@@ -512,11 +512,11 @@ class TestAsyncMemories:
             radius=0,
             top_k=-1,
         )
-        assert_matches_type(MemorySearchResponse, memory, path=["response"])
+        assert_matches_type(SearchMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_search(self, async_client: AsyncEveros) -> None:
+    async def test_raw_response_search(self, async_client: AsyncEverOS) -> None:
         response = await async_client.v1.memories.with_raw_response.search(
             filters={"foo": "bar"},
             query="What did Alice say about the project?",
@@ -525,11 +525,11 @@ class TestAsyncMemories:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         memory = await response.parse()
-        assert_matches_type(MemorySearchResponse, memory, path=["response"])
+        assert_matches_type(SearchMemoriesResponse, memory, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_search(self, async_client: AsyncEveros) -> None:
+    async def test_streaming_response_search(self, async_client: AsyncEverOS) -> None:
         async with async_client.v1.memories.with_streaming_response.search(
             filters={"foo": "bar"},
             query="What did Alice say about the project?",
@@ -538,6 +538,6 @@ class TestAsyncMemories:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             memory = await response.parse()
-            assert_matches_type(MemorySearchResponse, memory, path=["response"])
+            assert_matches_type(SearchMemoriesResponse, memory, path=["response"])
 
         assert cast(Any, response.is_closed) is True

@@ -9,7 +9,7 @@ import httpx
 from ..._types import Body, Query, Headers, NotGiven, not_given
 from ..._utils import maybe_transform, async_maybe_transform
 from ..._compat import cached_property
-from ...types.v1 import object_get_presigned_url_params
+from ...types.v1 import object_sign_params
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
     to_raw_response_wrapper,
@@ -18,7 +18,8 @@ from ..._response import (
     async_to_streamed_response_wrapper,
 )
 from ..._base_client import make_request_options
-from ...types.v1.object_get_presigned_url_response import ObjectGetPresignedURLResponse
+from ...types.v1.object_sign_response import ObjectSignResponse
+from ...types.v1.object_sign_item_request_param import ObjectSignItemRequestParam
 
 __all__ = ["ObjectResource", "AsyncObjectResource"]
 
@@ -32,7 +33,7 @@ class ObjectResource(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
         """
         return ObjectResourceWithRawResponse(self)
 
@@ -41,21 +42,21 @@ class ObjectResource(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
         """
         return ObjectResourceWithStreamingResponse(self)
 
-    def get_presigned_url(
+    def sign(
         self,
         *,
-        object_list: Iterable[object_get_presigned_url_params.ObjectList],
+        object_list: Iterable[ObjectSignItemRequestParam],
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> ObjectGetPresignedURLResponse:
+    ) -> ObjectSignResponse:
         """Generate a pre-signed S3 upload URL for multimodal content.
 
         Gateway
@@ -79,13 +80,11 @@ class ObjectResource(SyncAPIResource):
         """
         return self._post(
             "/api/v1/object/sign",
-            body=maybe_transform(
-                {"object_list": object_list}, object_get_presigned_url_params.ObjectGetPresignedURLParams
-            ),
+            body=maybe_transform({"object_list": object_list}, object_sign_params.ObjectSignParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=ObjectGetPresignedURLResponse,
+            cast_to=ObjectSignResponse,
         )
 
 
@@ -98,7 +97,7 @@ class AsyncObjectResource(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
         """
         return AsyncObjectResourceWithRawResponse(self)
 
@@ -107,21 +106,21 @@ class AsyncObjectResource(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
         """
         return AsyncObjectResourceWithStreamingResponse(self)
 
-    async def get_presigned_url(
+    async def sign(
         self,
         *,
-        object_list: Iterable[object_get_presigned_url_params.ObjectList],
+        object_list: Iterable[ObjectSignItemRequestParam],
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> ObjectGetPresignedURLResponse:
+    ) -> ObjectSignResponse:
         """Generate a pre-signed S3 upload URL for multimodal content.
 
         Gateway
@@ -145,13 +144,11 @@ class AsyncObjectResource(AsyncAPIResource):
         """
         return await self._post(
             "/api/v1/object/sign",
-            body=await async_maybe_transform(
-                {"object_list": object_list}, object_get_presigned_url_params.ObjectGetPresignedURLParams
-            ),
+            body=await async_maybe_transform({"object_list": object_list}, object_sign_params.ObjectSignParams),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=ObjectGetPresignedURLResponse,
+            cast_to=ObjectSignResponse,
         )
 
 
@@ -159,8 +156,8 @@ class ObjectResourceWithRawResponse:
     def __init__(self, object: ObjectResource) -> None:
         self._object = object
 
-        self.get_presigned_url = to_raw_response_wrapper(
-            object.get_presigned_url,
+        self.sign = to_raw_response_wrapper(
+            object.sign,
         )
 
 
@@ -168,8 +165,8 @@ class AsyncObjectResourceWithRawResponse:
     def __init__(self, object: AsyncObjectResource) -> None:
         self._object = object
 
-        self.get_presigned_url = async_to_raw_response_wrapper(
-            object.get_presigned_url,
+        self.sign = async_to_raw_response_wrapper(
+            object.sign,
         )
 
 
@@ -177,8 +174,8 @@ class ObjectResourceWithStreamingResponse:
     def __init__(self, object: ObjectResource) -> None:
         self._object = object
 
-        self.get_presigned_url = to_streamed_response_wrapper(
-            object.get_presigned_url,
+        self.sign = to_streamed_response_wrapper(
+            object.sign,
         )
 
 
@@ -186,6 +183,6 @@ class AsyncObjectResourceWithStreamingResponse:
     def __init__(self, object: AsyncObjectResource) -> None:
         self._object = object
 
-        self.get_presigned_url = async_to_streamed_response_wrapper(
-            object.get_presigned_url,
+        self.sign = async_to_streamed_response_wrapper(
+            object.sign,
         )

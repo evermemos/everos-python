@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Dict, Mapping, cast
-from typing_extensions import Self, Literal, override
+from typing import TYPE_CHECKING, Any, Mapping
+from typing_extensions import Self, override
 
 import httpx
 
@@ -21,10 +21,9 @@ from ._types import (
 )
 from ._utils import is_given, get_async_library
 from ._compat import cached_property
-from ._models import SecurityOptions
 from ._version import __version__
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
-from ._exceptions import EverosError, APIStatusError
+from ._exceptions import EverOSError, APIStatusError
 from ._base_client import (
     DEFAULT_MAX_RETRIES,
     SyncAPIClient,
@@ -35,38 +34,18 @@ if TYPE_CHECKING:
     from .resources import v1
     from .resources.v1.v1 import V1Resource, AsyncV1Resource
 
-__all__ = [
-    "ENVIRONMENTS",
-    "Timeout",
-    "Transport",
-    "ProxiesTypes",
-    "RequestOptions",
-    "Everos",
-    "AsyncEveros",
-    "Client",
-    "AsyncClient",
-]
-
-ENVIRONMENTS: Dict[str, str] = {
-    "production": "http://localhost:9527",
-    "environment_1": "https://dev-gateway.aws.evermind.ai",
-    "test": "https://test-gateway.aws.evermind.ai",
-    "environment_3": "https://api.evermind.ai",
-}
+__all__ = ["Timeout", "Transport", "ProxiesTypes", "RequestOptions", "EverOS", "AsyncEverOS", "Client", "AsyncClient"]
 
 
-class Everos(SyncAPIClient):
+class EverOS(SyncAPIClient):
     # client options
     api_key: str
-
-    _environment: Literal["production", "environment_1", "test", "environment_3"] | NotGiven
 
     def __init__(
         self,
         *,
         api_key: str | None = None,
-        environment: Literal["production", "environment_1", "test", "environment_3"] | NotGiven = not_given,
-        base_url: str | httpx.URL | None | NotGiven = not_given,
+        base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -85,43 +64,22 @@ class Everos(SyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new synchronous Everos client instance.
+        """Construct a new synchronous EverOS client instance.
 
         This automatically infers the `api_key` argument from the `EVEROS_API_KEY` environment variable if it is not provided.
         """
         if api_key is None:
             api_key = os.environ.get("EVEROS_API_KEY")
         if api_key is None:
-            raise EverosError(
+            raise EverOSError(
                 "The api_key client option must be set either by passing api_key to the client or by setting the EVEROS_API_KEY environment variable"
             )
         self.api_key = api_key
 
-        self._environment = environment
-
-        base_url_env = os.environ.get("EVEROS_BASE_URL")
-        if is_given(base_url) and base_url is not None:
-            # cast required because mypy doesn't understand the type narrowing
-            base_url = cast("str | httpx.URL", base_url)  # pyright: ignore[reportUnnecessaryCast]
-        elif is_given(environment):
-            if base_url_env and base_url is not None:
-                raise ValueError(
-                    "Ambiguous URL; The `EVEROS_BASE_URL` env var and the `environment` argument are given. If you want to use the environment, you must pass base_url=None",
-                )
-
-            try:
-                base_url = ENVIRONMENTS[environment]
-            except KeyError as exc:
-                raise ValueError(f"Unknown environment: {environment}") from exc
-        elif base_url_env is not None:
-            base_url = base_url_env
-        else:
-            self._environment = environment = "production"
-
-            try:
-                base_url = ENVIRONMENTS[environment]
-            except KeyError as exc:
-                raise ValueError(f"Unknown environment: {environment}") from exc
+        if base_url is None:
+            base_url = os.environ.get("EVER_OS_BASE_URL")
+        if base_url is None:
+            base_url = f"https://api.evermind.ai"
 
         super().__init__(
             version=__version__,
@@ -133,35 +91,35 @@ class Everos(SyncAPIClient):
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
         )
+        # custom: inject multimodal-aware MemoriesResource
+        from .lib._multimodal import MemoriesResourceWithMultimodal as _MemMultimodal
+        from .resources.v1.v1 import V1Resource as _V1Resource
+        _v1 = _V1Resource(self)
+        _v1.__dict__["memories"] = _MemMultimodal(self)
+        self.__dict__["v1"] = _v1
 
     @cached_property
     def v1(self) -> V1Resource:
-        """Async task status tracking"""
         from .resources.v1 import V1Resource
 
         return V1Resource(self)
 
     @cached_property
-    def with_raw_response(self) -> EverosWithRawResponse:
-        return EverosWithRawResponse(self)
+    def with_raw_response(self) -> EverOSWithRawResponse:
+        return EverOSWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> EverosWithStreamedResponse:
-        return EverosWithStreamedResponse(self)
+    def with_streaming_response(self) -> EverOSWithStreamedResponse:
+        return EverOSWithStreamedResponse(self)
 
     @property
     @override
     def qs(self) -> Querystring:
         return Querystring(array_format="comma")
 
-    @override
-    def _auth_headers(self, security: SecurityOptions) -> dict[str, str]:
-        return {
-            **(self._bearer_auth if security.get("bearer_auth", False) else {}),
-        }
-
     @property
-    def _bearer_auth(self) -> dict[str, str]:
+    @override
+    def auth_headers(self) -> dict[str, str]:
         api_key = self.api_key
         return {"Authorization": f"Bearer {api_key}"}
 
@@ -178,7 +136,6 @@ class Everos(SyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        environment: Literal["production", "environment_1", "test", "environment_3"] | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
@@ -214,7 +171,6 @@ class Everos(SyncAPIClient):
         return self.__class__(
             api_key=api_key or self.api_key,
             base_url=base_url or self.base_url,
-            environment=environment or self._environment,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
@@ -261,18 +217,15 @@ class Everos(SyncAPIClient):
         return APIStatusError(err_msg, response=response, body=body)
 
 
-class AsyncEveros(AsyncAPIClient):
+class AsyncEverOS(AsyncAPIClient):
     # client options
     api_key: str
-
-    _environment: Literal["production", "environment_1", "test", "environment_3"] | NotGiven
 
     def __init__(
         self,
         *,
         api_key: str | None = None,
-        environment: Literal["production", "environment_1", "test", "environment_3"] | NotGiven = not_given,
-        base_url: str | httpx.URL | None | NotGiven = not_given,
+        base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -291,43 +244,22 @@ class AsyncEveros(AsyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new async AsyncEveros client instance.
+        """Construct a new async AsyncEverOS client instance.
 
         This automatically infers the `api_key` argument from the `EVEROS_API_KEY` environment variable if it is not provided.
         """
         if api_key is None:
             api_key = os.environ.get("EVEROS_API_KEY")
         if api_key is None:
-            raise EverosError(
+            raise EverOSError(
                 "The api_key client option must be set either by passing api_key to the client or by setting the EVEROS_API_KEY environment variable"
             )
         self.api_key = api_key
 
-        self._environment = environment
-
-        base_url_env = os.environ.get("EVEROS_BASE_URL")
-        if is_given(base_url) and base_url is not None:
-            # cast required because mypy doesn't understand the type narrowing
-            base_url = cast("str | httpx.URL", base_url)  # pyright: ignore[reportUnnecessaryCast]
-        elif is_given(environment):
-            if base_url_env and base_url is not None:
-                raise ValueError(
-                    "Ambiguous URL; The `EVEROS_BASE_URL` env var and the `environment` argument are given. If you want to use the environment, you must pass base_url=None",
-                )
-
-            try:
-                base_url = ENVIRONMENTS[environment]
-            except KeyError as exc:
-                raise ValueError(f"Unknown environment: {environment}") from exc
-        elif base_url_env is not None:
-            base_url = base_url_env
-        else:
-            self._environment = environment = "production"
-
-            try:
-                base_url = ENVIRONMENTS[environment]
-            except KeyError as exc:
-                raise ValueError(f"Unknown environment: {environment}") from exc
+        if base_url is None:
+            base_url = os.environ.get("EVER_OS_BASE_URL")
+        if base_url is None:
+            base_url = f"https://api.evermind.ai"
 
         super().__init__(
             version=__version__,
@@ -339,35 +271,35 @@ class AsyncEveros(AsyncAPIClient):
             custom_query=default_query,
             _strict_response_validation=_strict_response_validation,
         )
+        # custom: inject multimodal-aware AsyncMemoriesResource
+        from .lib._multimodal import AsyncMemoriesResourceWithMultimodal as _AsyncMemMultimodal
+        from .resources.v1.v1 import AsyncV1Resource as _AsyncV1Resource
+        _v1 = _AsyncV1Resource(self)
+        _v1.__dict__["memories"] = _AsyncMemMultimodal(self)
+        self.__dict__["v1"] = _v1
 
     @cached_property
     def v1(self) -> AsyncV1Resource:
-        """Async task status tracking"""
         from .resources.v1 import AsyncV1Resource
 
         return AsyncV1Resource(self)
 
     @cached_property
-    def with_raw_response(self) -> AsyncEverosWithRawResponse:
-        return AsyncEverosWithRawResponse(self)
+    def with_raw_response(self) -> AsyncEverOSWithRawResponse:
+        return AsyncEverOSWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncEverosWithStreamedResponse:
-        return AsyncEverosWithStreamedResponse(self)
+    def with_streaming_response(self) -> AsyncEverOSWithStreamedResponse:
+        return AsyncEverOSWithStreamedResponse(self)
 
     @property
     @override
     def qs(self) -> Querystring:
         return Querystring(array_format="comma")
 
-    @override
-    def _auth_headers(self, security: SecurityOptions) -> dict[str, str]:
-        return {
-            **(self._bearer_auth if security.get("bearer_auth", False) else {}),
-        }
-
     @property
-    def _bearer_auth(self) -> dict[str, str]:
+    @override
+    def auth_headers(self) -> dict[str, str]:
         api_key = self.api_key
         return {"Authorization": f"Bearer {api_key}"}
 
@@ -384,7 +316,6 @@ class AsyncEveros(AsyncAPIClient):
         self,
         *,
         api_key: str | None = None,
-        environment: Literal["production", "environment_1", "test", "environment_3"] | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
@@ -420,7 +351,6 @@ class AsyncEveros(AsyncAPIClient):
         return self.__class__(
             api_key=api_key or self.api_key,
             base_url=base_url or self.base_url,
-            environment=environment or self._environment,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
             max_retries=max_retries if is_given(max_retries) else self.max_retries,
@@ -467,62 +397,58 @@ class AsyncEveros(AsyncAPIClient):
         return APIStatusError(err_msg, response=response, body=body)
 
 
-class EverosWithRawResponse:
-    _client: Everos
+class EverOSWithRawResponse:
+    _client: EverOS
 
-    def __init__(self, client: Everos) -> None:
+    def __init__(self, client: EverOS) -> None:
         self._client = client
 
     @cached_property
     def v1(self) -> v1.V1ResourceWithRawResponse:
-        """Async task status tracking"""
         from .resources.v1 import V1ResourceWithRawResponse
 
         return V1ResourceWithRawResponse(self._client.v1)
 
 
-class AsyncEverosWithRawResponse:
-    _client: AsyncEveros
+class AsyncEverOSWithRawResponse:
+    _client: AsyncEverOS
 
-    def __init__(self, client: AsyncEveros) -> None:
+    def __init__(self, client: AsyncEverOS) -> None:
         self._client = client
 
     @cached_property
     def v1(self) -> v1.AsyncV1ResourceWithRawResponse:
-        """Async task status tracking"""
         from .resources.v1 import AsyncV1ResourceWithRawResponse
 
         return AsyncV1ResourceWithRawResponse(self._client.v1)
 
 
-class EverosWithStreamedResponse:
-    _client: Everos
+class EverOSWithStreamedResponse:
+    _client: EverOS
 
-    def __init__(self, client: Everos) -> None:
+    def __init__(self, client: EverOS) -> None:
         self._client = client
 
     @cached_property
     def v1(self) -> v1.V1ResourceWithStreamingResponse:
-        """Async task status tracking"""
         from .resources.v1 import V1ResourceWithStreamingResponse
 
         return V1ResourceWithStreamingResponse(self._client.v1)
 
 
-class AsyncEverosWithStreamedResponse:
-    _client: AsyncEveros
+class AsyncEverOSWithStreamedResponse:
+    _client: AsyncEverOS
 
-    def __init__(self, client: AsyncEveros) -> None:
+    def __init__(self, client: AsyncEverOS) -> None:
         self._client = client
 
     @cached_property
     def v1(self) -> v1.AsyncV1ResourceWithStreamingResponse:
-        """Async task status tracking"""
         from .resources.v1 import AsyncV1ResourceWithStreamingResponse
 
         return AsyncV1ResourceWithStreamingResponse(self._client.v1)
 
 
-Client = Everos
+Client = EverOS
 
-AsyncClient = AsyncEveros
+AsyncClient = AsyncEverOS

@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Optional
 from typing_extensions import Literal, TypedDict
 
-from .llm_provider_config_param import LlmProviderConfigParam
+from .llm_custom_setting_param import LlmCustomSettingParam
 
-__all__ = ["SettingUpdateParams", "LlmCustomSetting"]
+__all__ = ["SettingUpdateParams"]
 
 
 class SettingUpdateParams(TypedDict, total=False):
@@ -17,7 +17,7 @@ class SettingUpdateParams(TypedDict, total=False):
     extraction_mode: Optional[Literal["default", "pro"]]
     """Extraction mode"""
 
-    llm_custom_setting: Optional[LlmCustomSetting]
+    llm_custom_setting: Optional[LlmCustomSettingParam]
     """LLM custom settings for algorithm control"""
 
     offline_profile_extraction_interval: Optional[int]
@@ -25,16 +25,3 @@ class SettingUpdateParams(TypedDict, total=False):
 
     timezone: Optional[str]
     """IANA timezone identifier"""
-
-
-class LlmCustomSetting(TypedDict, total=False):
-    """LLM custom settings for algorithm control"""
-
-    boundary: Optional[LlmProviderConfigParam]
-    """LLM config for boundary detection (fast, cheap model recommended)"""
-
-    extra: Optional[Dict[str, object]]
-    """Additional task-specific LLM configurations"""
-
-    extraction: Optional[LlmProviderConfigParam]
-    """LLM config for memory extraction (high quality model recommended)"""

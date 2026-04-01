@@ -20,6 +20,7 @@ from ..._response import (
 )
 from ..._base_client import make_request_options
 from ...types.v1.settings_api_response import SettingsAPIResponse
+from ...types.v1.llm_custom_setting_param import LlmCustomSettingParam
 
 __all__ = ["SettingsResource", "AsyncSettingsResource"]
 
@@ -33,7 +34,7 @@ class SettingsResource(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
         """
         return SettingsResourceWithRawResponse(self)
 
@@ -42,7 +43,7 @@ class SettingsResource(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
         """
         return SettingsResourceWithStreamingResponse(self)
 
@@ -70,7 +71,7 @@ class SettingsResource(SyncAPIResource):
         *,
         boundary_detection_timeout: Optional[int] | Omit = omit,
         extraction_mode: Optional[Literal["default", "pro"]] | Omit = omit,
-        llm_custom_setting: Optional[setting_update_params.LlmCustomSetting] | Omit = omit,
+        llm_custom_setting: Optional[LlmCustomSettingParam] | Omit = omit,
         offline_profile_extraction_interval: Optional[int] | Omit = omit,
         timezone: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -132,7 +133,7 @@ class AsyncSettingsResource(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/evermemos/everos-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/everos/everos-python#accessing-raw-response-data-eg-headers
         """
         return AsyncSettingsResourceWithRawResponse(self)
 
@@ -141,7 +142,7 @@ class AsyncSettingsResource(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/evermemos/everos-python#with_streaming_response
+        For more information, see https://www.github.com/everos/everos-python#with_streaming_response
         """
         return AsyncSettingsResourceWithStreamingResponse(self)
 
@@ -169,7 +170,7 @@ class AsyncSettingsResource(AsyncAPIResource):
         *,
         boundary_detection_timeout: Optional[int] | Omit = omit,
         extraction_mode: Optional[Literal["default", "pro"]] | Omit = omit,
-        llm_custom_setting: Optional[setting_update_params.LlmCustomSetting] | Omit = omit,
+        llm_custom_setting: Optional[LlmCustomSettingParam] | Omit = omit,
         offline_profile_extraction_interval: Optional[int] | Omit = omit,
         timezone: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.

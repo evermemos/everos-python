@@ -2,20 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Iterable
 from typing_extensions import Literal, Required, Annotated, TypedDict
 
 from ..._utils import PropertyInfo
 
-__all__ = ["ObjectGetPresignedURLParams", "ObjectList"]
+__all__ = ["ObjectSignItemRequestParam"]
 
 
-class ObjectGetPresignedURLParams(TypedDict, total=False):
-    object_list: Required[Annotated[Iterable[ObjectList], PropertyInfo(alias="objectList")]]
-    """List of files to sign (supports batch signing)"""
-
-
-class ObjectList(TypedDict, total=False):
+class ObjectSignItemRequestParam(TypedDict, total=False):
     """Single file sign request item"""
 
     file_id: Required[Annotated[str, PropertyInfo(alias="fileId")]]

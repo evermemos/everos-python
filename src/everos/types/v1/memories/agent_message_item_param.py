@@ -5,50 +5,13 @@ from __future__ import annotations
 from typing import Union, Iterable, Optional
 from typing_extensions import Literal, Required, TypedDict
 
+from .tool_call_param import ToolCallParam
 from ..content_item_param import ContentItemParam
 
-__all__ = ["AgentCreateParams", "Message", "MessageToolCall", "MessageToolCallFunction"]
+__all__ = ["AgentMessageItemParam"]
 
 
-class AgentCreateParams(TypedDict, total=False):
-    messages: Required[Iterable[Message]]
-    """Agent trajectory messages (1-500 items)"""
-
-    user_id: Required[str]
-    """Owner user ID"""
-
-    async_mode: bool
-    """Enable async processing.
-
-    When true, returns 202 with task_id; when false, processes synchronously and
-    returns 200.
-    """
-
-    session_id: Optional[str]
-    """Session identifier"""
-
-
-class MessageToolCallFunction(TypedDict, total=False):
-    arguments: Required[str]
-    """JSON-encoded arguments string"""
-
-    name: Required[str]
-    """Function/tool name"""
-
-
-class MessageToolCall(TypedDict, total=False):
-    """OpenAI-format tool call made by the assistant"""
-
-    id: Required[str]
-    """Unique tool call ID"""
-
-    function: Required[MessageToolCallFunction]
-
-    type: str
-    """Tool call type"""
-
-
-class Message(TypedDict, total=False):
+class AgentMessageItemParam(TypedDict, total=False):
     """Agent trajectory message.
 
     Supports role='tool' in addition to 'user'/'assistant'. Does not support message_id or sender_name (stripped by Gateway).
@@ -76,5 +39,5 @@ class Message(TypedDict, total=False):
     tool_call_id: Optional[str]
     """ID of the tool call this message responds to. Required when role='tool'."""
 
-    tool_calls: Optional[Iterable[MessageToolCall]]
+    tool_calls: Optional[Iterable[ToolCallParam]]
     """Tool calls made by assistant (OpenAI format). Only when role='assistant'."""

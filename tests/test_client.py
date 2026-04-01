@@ -19,11 +19,11 @@ import pytest
 from respx import MockRouter
 from pydantic import ValidationError
 
-from everos import Everos, AsyncEveros, APIResponseValidationError
+from everos import EverOS, AsyncEverOS, APIResponseValidationError
 from everos._types import Omit
 from everos._utils import asyncify
 from everos._models import BaseModel, FinalRequestOptions
-from everos._exceptions import EverosError, APIStatusError, APITimeoutError, APIResponseValidationError
+from everos._exceptions import EverOSError, APIStatusError, APITimeoutError, APIResponseValidationError
 from everos._base_client import (
     DEFAULT_TIMEOUT,
     HTTPX_DEFAULT_TIMEOUT,
@@ -103,7 +103,7 @@ async def _make_async_iterator(iterable: Iterable[T], counter: Optional[Counter]
         yield item
 
 
-def _get_open_connections(client: Everos | AsyncEveros) -> int:
+def _get_open_connections(client: EverOS | AsyncEverOS) -> int:
     transport = client._client._transport
     assert isinstance(transport, httpx.HTTPTransport) or isinstance(transport, httpx.AsyncHTTPTransport)
 
@@ -111,9 +111,9 @@ def _get_open_connections(client: Everos | AsyncEveros) -> int:
     return len(pool._requests)
 
 
-class TestEveros:
+class TestEverOS:
     @pytest.mark.respx(base_url=base_url)
-    def test_raw_response(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_raw_response(self, respx_mock: MockRouter, client: EverOS) -> None:
         respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         response = client.post("/foo", cast_to=httpx.Response)
@@ -122,7 +122,7 @@ class TestEveros:
         assert response.json() == {"foo": "bar"}
 
     @pytest.mark.respx(base_url=base_url)
-    def test_raw_response_for_binary(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_raw_response_for_binary(self, respx_mock: MockRouter, client: EverOS) -> None:
         respx_mock.post("/foo").mock(
             return_value=httpx.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
         )
@@ -132,7 +132,7 @@ class TestEveros:
         assert isinstance(response, httpx.Response)
         assert response.json() == {"foo": "bar"}
 
-    def test_copy(self, client: Everos) -> None:
+    def test_copy(self, client: EverOS) -> None:
         copied = client.copy()
         assert id(copied) != id(client)
 
@@ -140,7 +140,7 @@ class TestEveros:
         assert copied.api_key == "another My API Key"
         assert client.api_key == "My API Key"
 
-    def test_copy_default_options(self, client: Everos) -> None:
+    def test_copy_default_options(self, client: EverOS) -> None:
         # options that have a default are overridden correctly
         copied = client.copy(max_retries=7)
         assert copied.max_retries == 7
@@ -157,7 +157,7 @@ class TestEveros:
         assert isinstance(client.timeout, httpx.Timeout)
 
     def test_copy_default_headers(self) -> None:
-        client = Everos(
+        client = EverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
@@ -192,7 +192,7 @@ class TestEveros:
         client.close()
 
     def test_copy_default_query(self) -> None:
-        client = Everos(
+        client = EverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
@@ -229,7 +229,7 @@ class TestEveros:
 
         client.close()
 
-    def test_copy_signature(self, client: Everos) -> None:
+    def test_copy_signature(self, client: EverOS) -> None:
         # ensure the same parameters that can be passed to the client are defined in the `.copy()` method
         init_signature = inspect.signature(
             # mypy doesn't like that we access the `__init__` property.
@@ -246,7 +246,7 @@ class TestEveros:
             assert copy_param is not None, f"copy() signature is missing the {name} param"
 
     @pytest.mark.skipif(sys.version_info >= (3, 10), reason="fails because of a memory leak that started from 3.12")
-    def test_copy_build_request(self, client: Everos) -> None:
+    def test_copy_build_request(self, client: EverOS) -> None:
         options = FinalRequestOptions(method="get", url="/foo")
 
         def build_request(options: FinalRequestOptions) -> None:
@@ -308,7 +308,7 @@ class TestEveros:
                     print(frame)
             raise AssertionError()
 
-    def test_request_timeout(self, client: Everos) -> None:
+    def test_request_timeout(self, client: EverOS) -> None:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
@@ -318,7 +318,7 @@ class TestEveros:
         assert timeout == httpx.Timeout(100.0)
 
     def test_client_timeout_option(self) -> None:
-        client = Everos(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx.Timeout(0))
+        client = EverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx.Timeout(0))
 
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
@@ -329,7 +329,7 @@ class TestEveros:
     def test_http_client_timeout_option(self) -> None:
         # custom timeout given to the httpx client should be used
         with httpx.Client(timeout=None) as http_client:
-            client = Everos(
+            client = EverOS(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -341,7 +341,7 @@ class TestEveros:
 
         # no timeout given to the httpx client should not use the httpx default
         with httpx.Client() as http_client:
-            client = Everos(
+            client = EverOS(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -353,7 +353,7 @@ class TestEveros:
 
         # explicitly passing the default timeout currently results in it being ignored
         with httpx.Client(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
-            client = Everos(
+            client = EverOS(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -366,7 +366,7 @@ class TestEveros:
     async def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
             async with httpx.AsyncClient() as http_client:
-                Everos(
+                EverOS(
                     base_url=base_url,
                     api_key=api_key,
                     _strict_response_validation=True,
@@ -374,14 +374,14 @@ class TestEveros:
                 )
 
     def test_default_headers_option(self) -> None:
-        test_client = Everos(
+        test_client = EverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = test_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
         assert request.headers.get("x-stainless-lang") == "python"
 
-        test_client2 = Everos(
+        test_client2 = EverOS(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
@@ -398,17 +398,17 @@ class TestEveros:
         test_client2.close()
 
     def test_validate_headers(self) -> None:
-        client = Everos(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        client = EverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("Authorization") == f"Bearer {api_key}"
 
-        with pytest.raises(EverosError):
+        with pytest.raises(EverOSError):
             with update_env(**{"EVEROS_API_KEY": Omit()}):
-                client2 = Everos(base_url=base_url, api_key=None, _strict_response_validation=True)
+                client2 = EverOS(base_url=base_url, api_key=None, _strict_response_validation=True)
             _ = client2
 
     def test_default_query_option(self) -> None:
-        client = Everos(
+        client = EverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -427,7 +427,7 @@ class TestEveros:
 
         client.close()
 
-    def test_request_extra_json(self, client: Everos) -> None:
+    def test_request_extra_json(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -461,7 +461,7 @@ class TestEveros:
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
 
-    def test_request_extra_headers(self, client: Everos) -> None:
+    def test_request_extra_headers(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -483,7 +483,7 @@ class TestEveros:
         )
         assert request.headers.get("X-Bar") == "false"
 
-    def test_request_extra_query(self, client: Everos) -> None:
+    def test_request_extra_query(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -524,7 +524,7 @@ class TestEveros:
         params = dict(request.url.params)
         assert params == {"foo": "2"}
 
-    def test_multipart_repeating_array(self, client: Everos) -> None:
+    def test_multipart_repeating_array(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions.construct(
                 method="post",
@@ -554,7 +554,7 @@ class TestEveros:
         ]
 
     @pytest.mark.respx(base_url=base_url)
-    def test_binary_content_upload(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_binary_content_upload(self, respx_mock: MockRouter, client: EverOS) -> None:
         respx_mock.post("/upload").mock(side_effect=mirror_request_content)
 
         file_content = b"Hello, this is a test file."
@@ -579,7 +579,7 @@ class TestEveros:
             assert counter.value == 0, "the request body should not have been read"
             return httpx.Response(200, content=request.read())
 
-        with Everos(
+        with EverOS(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
@@ -598,7 +598,7 @@ class TestEveros:
             assert counter.value == 1
 
     @pytest.mark.respx(base_url=base_url)
-    def test_binary_content_upload_with_body_is_deprecated(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_binary_content_upload_with_body_is_deprecated(self, respx_mock: MockRouter, client: EverOS) -> None:
         respx_mock.post("/upload").mock(side_effect=mirror_request_content)
 
         file_content = b"Hello, this is a test file."
@@ -618,7 +618,7 @@ class TestEveros:
         assert response.content == file_content
 
     @pytest.mark.respx(base_url=base_url)
-    def test_basic_union_response(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_basic_union_response(self, respx_mock: MockRouter, client: EverOS) -> None:
         class Model1(BaseModel):
             name: str
 
@@ -632,7 +632,7 @@ class TestEveros:
         assert response.foo == "bar"
 
     @pytest.mark.respx(base_url=base_url)
-    def test_union_response_different_types(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_union_response_different_types(self, respx_mock: MockRouter, client: EverOS) -> None:
         """Union of objects with the same field name using a different type"""
 
         class Model1(BaseModel):
@@ -654,7 +654,7 @@ class TestEveros:
         assert response.foo == 1
 
     @pytest.mark.respx(base_url=base_url)
-    def test_non_application_json_content_type_for_json_data(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_non_application_json_content_type_for_json_data(self, respx_mock: MockRouter, client: EverOS) -> None:
         """
         Response that sets Content-Type to something other than application/json but returns json data
         """
@@ -675,7 +675,7 @@ class TestEveros:
         assert response.foo == 2
 
     def test_base_url_setter(self) -> None:
-        client = Everos(base_url="https://example.com/from_init", api_key=api_key, _strict_response_validation=True)
+        client = EverOS(base_url="https://example.com/from_init", api_key=api_key, _strict_response_validation=True)
         assert client.base_url == "https://example.com/from_init/"
 
         client.base_url = "https://example.com/from_setter"  # type: ignore[assignment]
@@ -685,25 +685,15 @@ class TestEveros:
         client.close()
 
     def test_base_url_env(self) -> None:
-        with update_env(EVEROS_BASE_URL="http://localhost:5000/from/env"):
-            client = Everos(api_key=api_key, _strict_response_validation=True)
+        with update_env(EVER_OS_BASE_URL="http://localhost:5000/from/env"):
+            client = EverOS(api_key=api_key, _strict_response_validation=True)
             assert client.base_url == "http://localhost:5000/from/env/"
 
-        # explicit environment arg requires explicitness
-        with update_env(EVEROS_BASE_URL="http://localhost:5000/from/env"):
-            with pytest.raises(ValueError, match=r"you must pass base_url=None"):
-                Everos(api_key=api_key, _strict_response_validation=True, environment="production")
-
-            client = Everos(base_url=None, api_key=api_key, _strict_response_validation=True, environment="production")
-            assert str(client.base_url).startswith("http://localhost:9527")
-
-            client.close()
-
     @pytest.mark.parametrize(
         "client",
         [
-            Everos(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
-            Everos(
+            EverOS(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
+            EverOS(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -712,7 +702,7 @@ class TestEveros:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_base_url_trailing_slash(self, client: Everos) -> None:
+    def test_base_url_trailing_slash(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -726,8 +716,8 @@ class TestEveros:
     @pytest.mark.parametrize(
         "client",
         [
-            Everos(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
-            Everos(
+            EverOS(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
+            EverOS(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -736,7 +726,7 @@ class TestEveros:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_base_url_no_trailing_slash(self, client: Everos) -> None:
+    def test_base_url_no_trailing_slash(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -750,8 +740,8 @@ class TestEveros:
     @pytest.mark.parametrize(
         "client",
         [
-            Everos(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
-            Everos(
+            EverOS(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
+            EverOS(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -760,7 +750,7 @@ class TestEveros:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_absolute_request_url(self, client: Everos) -> None:
+    def test_absolute_request_url(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -772,7 +762,7 @@ class TestEveros:
         client.close()
 
     def test_copied_client_does_not_close_http(self) -> None:
-        test_client = Everos(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        test_client = EverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         assert not test_client.is_closed()
 
         copied = test_client.copy()
@@ -783,7 +773,7 @@ class TestEveros:
         assert not test_client.is_closed()
 
     def test_client_context_manager(self) -> None:
-        test_client = Everos(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        test_client = EverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         with test_client as c2:
             assert c2 is test_client
             assert not c2.is_closed()
@@ -791,7 +781,7 @@ class TestEveros:
         assert test_client.is_closed()
 
     @pytest.mark.respx(base_url=base_url)
-    def test_client_response_validation_error(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_client_response_validation_error(self, respx_mock: MockRouter, client: EverOS) -> None:
         class Model(BaseModel):
             foo: str
 
@@ -804,7 +794,7 @@ class TestEveros:
 
     def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
-            Everos(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None))
+            EverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None))
 
     @pytest.mark.respx(base_url=base_url)
     def test_received_text_for_expected_json(self, respx_mock: MockRouter) -> None:
@@ -813,12 +803,12 @@ class TestEveros:
 
         respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
 
-        strict_client = Everos(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        strict_client = EverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
         with pytest.raises(APIResponseValidationError):
             strict_client.get("/foo", cast_to=Model)
 
-        non_strict_client = Everos(base_url=base_url, api_key=api_key, _strict_response_validation=False)
+        non_strict_client = EverOS(base_url=base_url, api_key=api_key, _strict_response_validation=False)
 
         response = non_strict_client.get("/foo", cast_to=Model)
         assert isinstance(response, str)  # type: ignore[unreachable]
@@ -849,7 +839,7 @@ class TestEveros:
     )
     @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     def test_parse_retry_after_header(
-        self, remaining_retries: int, retry_after: str, timeout: float, client: Everos
+        self, remaining_retries: int, retry_after: str, timeout: float, client: EverOS
     ) -> None:
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
@@ -858,11 +848,11 @@ class TestEveros:
 
     @mock.patch("everos._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: EverOS) -> None:
         respx_mock.post("/api/v1/memories").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
-            client.v1.memories.with_streaming_response.create(
+            client.v1.memories.with_streaming_response.add(
                 messages=[
                     {
                         "content": "x",
@@ -877,11 +867,11 @@ class TestEveros:
 
     @mock.patch("everos._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: EverOS) -> None:
         respx_mock.post("/api/v1/memories").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
-            client.v1.memories.with_streaming_response.create(
+            client.v1.memories.with_streaming_response.add(
                 messages=[
                     {
                         "content": "x",
@@ -899,7 +889,7 @@ class TestEveros:
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     def test_retries_taken(
         self,
-        client: Everos,
+        client: EverOS,
         failures_before_success: int,
         failure_mode: Literal["status", "exception"],
         respx_mock: MockRouter,
@@ -919,7 +909,7 @@ class TestEveros:
 
         respx_mock.post("/api/v1/memories").mock(side_effect=retry_handler)
 
-        response = client.v1.memories.with_raw_response.create(
+        response = client.v1.memories.with_raw_response.add(
             messages=[
                 {
                     "content": "x",
@@ -937,7 +927,7 @@ class TestEveros:
     @mock.patch("everos._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_omit_retry_count_header(
-        self, client: Everos, failures_before_success: int, respx_mock: MockRouter
+        self, client: EverOS, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = client.with_options(max_retries=4)
 
@@ -952,7 +942,7 @@ class TestEveros:
 
         respx_mock.post("/api/v1/memories").mock(side_effect=retry_handler)
 
-        response = client.v1.memories.with_raw_response.create(
+        response = client.v1.memories.with_raw_response.add(
             messages=[
                 {
                     "content": "x",
@@ -970,7 +960,7 @@ class TestEveros:
     @mock.patch("everos._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_overwrite_retry_count_header(
-        self, client: Everos, failures_before_success: int, respx_mock: MockRouter
+        self, client: EverOS, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = client.with_options(max_retries=4)
 
@@ -985,7 +975,7 @@ class TestEveros:
 
         respx_mock.post("/api/v1/memories").mock(side_effect=retry_handler)
 
-        response = client.v1.memories.with_raw_response.create(
+        response = client.v1.memories.with_raw_response.add(
             messages=[
                 {
                     "content": "x",
@@ -1030,7 +1020,7 @@ class TestEveros:
         )
 
     @pytest.mark.respx(base_url=base_url)
-    def test_follow_redirects(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_follow_redirects(self, respx_mock: MockRouter, client: EverOS) -> None:
         # Test that the default follow_redirects=True allows following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -1042,7 +1032,7 @@ class TestEveros:
         assert response.json() == {"status": "ok"}
 
     @pytest.mark.respx(base_url=base_url)
-    def test_follow_redirects_disabled(self, respx_mock: MockRouter, client: Everos) -> None:
+    def test_follow_redirects_disabled(self, respx_mock: MockRouter, client: EverOS) -> None:
         # Test that follow_redirects=False prevents following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -1055,9 +1045,9 @@ class TestEveros:
         assert exc_info.value.response.headers["Location"] == f"{base_url}/redirected"
 
 
-class TestAsyncEveros:
+class TestAsyncEverOS:
     @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         response = await async_client.post("/foo", cast_to=httpx.Response)
@@ -1066,7 +1056,7 @@ class TestAsyncEveros:
         assert response.json() == {"foo": "bar"}
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response_for_binary(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_raw_response_for_binary(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         respx_mock.post("/foo").mock(
             return_value=httpx.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
         )
@@ -1076,7 +1066,7 @@ class TestAsyncEveros:
         assert isinstance(response, httpx.Response)
         assert response.json() == {"foo": "bar"}
 
-    def test_copy(self, async_client: AsyncEveros) -> None:
+    def test_copy(self, async_client: AsyncEverOS) -> None:
         copied = async_client.copy()
         assert id(copied) != id(async_client)
 
@@ -1084,7 +1074,7 @@ class TestAsyncEveros:
         assert copied.api_key == "another My API Key"
         assert async_client.api_key == "My API Key"
 
-    def test_copy_default_options(self, async_client: AsyncEveros) -> None:
+    def test_copy_default_options(self, async_client: AsyncEverOS) -> None:
         # options that have a default are overridden correctly
         copied = async_client.copy(max_retries=7)
         assert copied.max_retries == 7
@@ -1101,7 +1091,7 @@ class TestAsyncEveros:
         assert isinstance(async_client.timeout, httpx.Timeout)
 
     async def test_copy_default_headers(self) -> None:
-        client = AsyncEveros(
+        client = AsyncEverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
@@ -1136,7 +1126,7 @@ class TestAsyncEveros:
         await client.close()
 
     async def test_copy_default_query(self) -> None:
-        client = AsyncEveros(
+        client = AsyncEverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
@@ -1173,7 +1163,7 @@ class TestAsyncEveros:
 
         await client.close()
 
-    def test_copy_signature(self, async_client: AsyncEveros) -> None:
+    def test_copy_signature(self, async_client: AsyncEverOS) -> None:
         # ensure the same parameters that can be passed to the client are defined in the `.copy()` method
         init_signature = inspect.signature(
             # mypy doesn't like that we access the `__init__` property.
@@ -1190,7 +1180,7 @@ class TestAsyncEveros:
             assert copy_param is not None, f"copy() signature is missing the {name} param"
 
     @pytest.mark.skipif(sys.version_info >= (3, 10), reason="fails because of a memory leak that started from 3.12")
-    def test_copy_build_request(self, async_client: AsyncEveros) -> None:
+    def test_copy_build_request(self, async_client: AsyncEverOS) -> None:
         options = FinalRequestOptions(method="get", url="/foo")
 
         def build_request(options: FinalRequestOptions) -> None:
@@ -1252,7 +1242,7 @@ class TestAsyncEveros:
                     print(frame)
             raise AssertionError()
 
-    async def test_request_timeout(self, async_client: AsyncEveros) -> None:
+    async def test_request_timeout(self, async_client: AsyncEverOS) -> None:
         request = async_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
@@ -1264,7 +1254,7 @@ class TestAsyncEveros:
         assert timeout == httpx.Timeout(100.0)
 
     async def test_client_timeout_option(self) -> None:
-        client = AsyncEveros(
+        client = AsyncEverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx.Timeout(0)
         )
 
@@ -1277,7 +1267,7 @@ class TestAsyncEveros:
     async def test_http_client_timeout_option(self) -> None:
         # custom timeout given to the httpx client should be used
         async with httpx.AsyncClient(timeout=None) as http_client:
-            client = AsyncEveros(
+            client = AsyncEverOS(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1289,7 +1279,7 @@ class TestAsyncEveros:
 
         # no timeout given to the httpx client should not use the httpx default
         async with httpx.AsyncClient() as http_client:
-            client = AsyncEveros(
+            client = AsyncEverOS(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1301,7 +1291,7 @@ class TestAsyncEveros:
 
         # explicitly passing the default timeout currently results in it being ignored
         async with httpx.AsyncClient(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
-            client = AsyncEveros(
+            client = AsyncEverOS(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1314,7 +1304,7 @@ class TestAsyncEveros:
     def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
             with httpx.Client() as http_client:
-                AsyncEveros(
+                AsyncEverOS(
                     base_url=base_url,
                     api_key=api_key,
                     _strict_response_validation=True,
@@ -1322,14 +1312,14 @@ class TestAsyncEveros:
                 )
 
     async def test_default_headers_option(self) -> None:
-        test_client = AsyncEveros(
+        test_client = AsyncEverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = test_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
         assert request.headers.get("x-stainless-lang") == "python"
 
-        test_client2 = AsyncEveros(
+        test_client2 = AsyncEverOS(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
@@ -1346,17 +1336,17 @@ class TestAsyncEveros:
         await test_client2.close()
 
     def test_validate_headers(self) -> None:
-        client = AsyncEveros(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        client = AsyncEverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("Authorization") == f"Bearer {api_key}"
 
-        with pytest.raises(EverosError):
+        with pytest.raises(EverOSError):
             with update_env(**{"EVEROS_API_KEY": Omit()}):
-                client2 = AsyncEveros(base_url=base_url, api_key=None, _strict_response_validation=True)
+                client2 = AsyncEverOS(base_url=base_url, api_key=None, _strict_response_validation=True)
             _ = client2
 
     async def test_default_query_option(self) -> None:
-        client = AsyncEveros(
+        client = AsyncEverOS(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1375,7 +1365,7 @@ class TestAsyncEveros:
 
         await client.close()
 
-    def test_request_extra_json(self, client: Everos) -> None:
+    def test_request_extra_json(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1409,7 +1399,7 @@ class TestAsyncEveros:
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
 
-    def test_request_extra_headers(self, client: Everos) -> None:
+    def test_request_extra_headers(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1431,7 +1421,7 @@ class TestAsyncEveros:
         )
         assert request.headers.get("X-Bar") == "false"
 
-    def test_request_extra_query(self, client: Everos) -> None:
+    def test_request_extra_query(self, client: EverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1472,7 +1462,7 @@ class TestAsyncEveros:
         params = dict(request.url.params)
         assert params == {"foo": "2"}
 
-    def test_multipart_repeating_array(self, async_client: AsyncEveros) -> None:
+    def test_multipart_repeating_array(self, async_client: AsyncEverOS) -> None:
         request = async_client._build_request(
             FinalRequestOptions.construct(
                 method="post",
@@ -1502,7 +1492,7 @@ class TestAsyncEveros:
         ]
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_binary_content_upload(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_binary_content_upload(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         respx_mock.post("/upload").mock(side_effect=mirror_request_content)
 
         file_content = b"Hello, this is a test file."
@@ -1527,7 +1517,7 @@ class TestAsyncEveros:
             assert counter.value == 0, "the request body should not have been read"
             return httpx.Response(200, content=await request.aread())
 
-        async with AsyncEveros(
+        async with AsyncEverOS(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
@@ -1547,7 +1537,7 @@ class TestAsyncEveros:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_binary_content_upload_with_body_is_deprecated(
-        self, respx_mock: MockRouter, async_client: AsyncEveros
+        self, respx_mock: MockRouter, async_client: AsyncEverOS
     ) -> None:
         respx_mock.post("/upload").mock(side_effect=mirror_request_content)
 
@@ -1568,7 +1558,7 @@ class TestAsyncEveros:
         assert response.content == file_content
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_basic_union_response(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_basic_union_response(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         class Model1(BaseModel):
             name: str
 
@@ -1582,7 +1572,7 @@ class TestAsyncEveros:
         assert response.foo == "bar"
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_union_response_different_types(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_union_response_different_types(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         """Union of objects with the same field name using a different type"""
 
         class Model1(BaseModel):
@@ -1605,7 +1595,7 @@ class TestAsyncEveros:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_non_application_json_content_type_for_json_data(
-        self, respx_mock: MockRouter, async_client: AsyncEveros
+        self, respx_mock: MockRouter, async_client: AsyncEverOS
     ) -> None:
         """
         Response that sets Content-Type to something other than application/json but returns json data
@@ -1627,7 +1617,7 @@ class TestAsyncEveros:
         assert response.foo == 2
 
     async def test_base_url_setter(self) -> None:
-        client = AsyncEveros(
+        client = AsyncEverOS(
             base_url="https://example.com/from_init", api_key=api_key, _strict_response_validation=True
         )
         assert client.base_url == "https://example.com/from_init/"
@@ -1639,29 +1629,17 @@ class TestAsyncEveros:
         await client.close()
 
     async def test_base_url_env(self) -> None:
-        with update_env(EVEROS_BASE_URL="http://localhost:5000/from/env"):
-            client = AsyncEveros(api_key=api_key, _strict_response_validation=True)
+        with update_env(EVER_OS_BASE_URL="http://localhost:5000/from/env"):
+            client = AsyncEverOS(api_key=api_key, _strict_response_validation=True)
             assert client.base_url == "http://localhost:5000/from/env/"
 
-        # explicit environment arg requires explicitness
-        with update_env(EVEROS_BASE_URL="http://localhost:5000/from/env"):
-            with pytest.raises(ValueError, match=r"you must pass base_url=None"):
-                AsyncEveros(api_key=api_key, _strict_response_validation=True, environment="production")
-
-            client = AsyncEveros(
-                base_url=None, api_key=api_key, _strict_response_validation=True, environment="production"
-            )
-            assert str(client.base_url).startswith("http://localhost:9527")
-
-            await client.close()
-
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncEveros(
+            AsyncEverOS(
                 base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True
             ),
-            AsyncEveros(
+            AsyncEverOS(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -1670,7 +1648,7 @@ class TestAsyncEveros:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_base_url_trailing_slash(self, client: AsyncEveros) -> None:
+    async def test_base_url_trailing_slash(self, client: AsyncEverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1684,10 +1662,10 @@ class TestAsyncEveros:
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncEveros(
+            AsyncEverOS(
                 base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True
             ),
-            AsyncEveros(
+            AsyncEverOS(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -1696,7 +1674,7 @@ class TestAsyncEveros:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_base_url_no_trailing_slash(self, client: AsyncEveros) -> None:
+    async def test_base_url_no_trailing_slash(self, client: AsyncEverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1710,10 +1688,10 @@ class TestAsyncEveros:
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncEveros(
+            AsyncEverOS(
                 base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True
             ),
-            AsyncEveros(
+            AsyncEverOS(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -1722,7 +1700,7 @@ class TestAsyncEveros:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_absolute_request_url(self, client: AsyncEveros) -> None:
+    async def test_absolute_request_url(self, client: AsyncEverOS) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1734,7 +1712,7 @@ class TestAsyncEveros:
         await client.close()
 
     async def test_copied_client_does_not_close_http(self) -> None:
-        test_client = AsyncEveros(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        test_client = AsyncEverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         assert not test_client.is_closed()
 
         copied = test_client.copy()
@@ -1746,7 +1724,7 @@ class TestAsyncEveros:
         assert not test_client.is_closed()
 
     async def test_client_context_manager(self) -> None:
-        test_client = AsyncEveros(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        test_client = AsyncEverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         async with test_client as c2:
             assert c2 is test_client
             assert not c2.is_closed()
@@ -1754,7 +1732,7 @@ class TestAsyncEveros:
         assert test_client.is_closed()
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_client_response_validation_error(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_client_response_validation_error(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         class Model(BaseModel):
             foo: str
 
@@ -1767,7 +1745,7 @@ class TestAsyncEveros:
 
     async def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
-            AsyncEveros(
+            AsyncEverOS(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None)
             )
 
@@ -1778,12 +1756,12 @@ class TestAsyncEveros:
 
         respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
 
-        strict_client = AsyncEveros(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        strict_client = AsyncEverOS(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
         with pytest.raises(APIResponseValidationError):
             await strict_client.get("/foo", cast_to=Model)
 
-        non_strict_client = AsyncEveros(base_url=base_url, api_key=api_key, _strict_response_validation=False)
+        non_strict_client = AsyncEverOS(base_url=base_url, api_key=api_key, _strict_response_validation=False)
 
         response = await non_strict_client.get("/foo", cast_to=Model)
         assert isinstance(response, str)  # type: ignore[unreachable]
@@ -1814,7 +1792,7 @@ class TestAsyncEveros:
     )
     @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     async def test_parse_retry_after_header(
-        self, remaining_retries: int, retry_after: str, timeout: float, async_client: AsyncEveros
+        self, remaining_retries: int, retry_after: str, timeout: float, async_client: AsyncEverOS
     ) -> None:
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
@@ -1823,11 +1801,11 @@ class TestAsyncEveros:
 
     @mock.patch("everos._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    async def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         respx_mock.post("/api/v1/memories").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
-            await async_client.v1.memories.with_streaming_response.create(
+            await async_client.v1.memories.with_streaming_response.add(
                 messages=[
                     {
                         "content": "x",
@@ -1842,11 +1820,11 @@ class TestAsyncEveros:
 
     @mock.patch("everos._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    async def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         respx_mock.post("/api/v1/memories").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
-            await async_client.v1.memories.with_streaming_response.create(
+            await async_client.v1.memories.with_streaming_response.add(
                 messages=[
                     {
                         "content": "x",
@@ -1864,7 +1842,7 @@ class TestAsyncEveros:
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     async def test_retries_taken(
         self,
-        async_client: AsyncEveros,
+        async_client: AsyncEverOS,
         failures_before_success: int,
         failure_mode: Literal["status", "exception"],
         respx_mock: MockRouter,
@@ -1884,7 +1862,7 @@ class TestAsyncEveros:
 
         respx_mock.post("/api/v1/memories").mock(side_effect=retry_handler)
 
-        response = await client.v1.memories.with_raw_response.create(
+        response = await client.v1.memories.with_raw_response.add(
             messages=[
                 {
                     "content": "x",
@@ -1902,7 +1880,7 @@ class TestAsyncEveros:
     @mock.patch("everos._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_omit_retry_count_header(
-        self, async_client: AsyncEveros, failures_before_success: int, respx_mock: MockRouter
+        self, async_client: AsyncEverOS, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = async_client.with_options(max_retries=4)
 
@@ -1917,7 +1895,7 @@ class TestAsyncEveros:
 
         respx_mock.post("/api/v1/memories").mock(side_effect=retry_handler)
 
-        response = await client.v1.memories.with_raw_response.create(
+        response = await client.v1.memories.with_raw_response.add(
             messages=[
                 {
                     "content": "x",
@@ -1935,7 +1913,7 @@ class TestAsyncEveros:
     @mock.patch("everos._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_overwrite_retry_count_header(
-        self, async_client: AsyncEveros, failures_before_success: int, respx_mock: MockRouter
+        self, async_client: AsyncEverOS, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = async_client.with_options(max_retries=4)
 
@@ -1950,7 +1928,7 @@ class TestAsyncEveros:
 
         respx_mock.post("/api/v1/memories").mock(side_effect=retry_handler)
 
-        response = await client.v1.memories.with_raw_response.create(
+        response = await client.v1.memories.with_raw_response.add(
             messages=[
                 {
                     "content": "x",
@@ -1999,7 +1977,7 @@ class TestAsyncEveros:
         )
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         # Test that the default follow_redirects=True allows following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -2011,7 +1989,7 @@ class TestAsyncEveros:
         assert response.json() == {"status": "ok"}
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_follow_redirects_disabled(self, respx_mock: MockRouter, async_client: AsyncEveros) -> None:
+    async def test_follow_redirects_disabled(self, respx_mock: MockRouter, async_client: AsyncEverOS) -> None:
         # Test that follow_redirects=False prevents following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})

@@ -5,9 +5,12 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import TypedDict
 
-__all__ = ["SenderUpdateParams"]
+__all__ = ["GroupPatchParams"]
 
 
-class SenderUpdateParams(TypedDict, total=False):
+class GroupPatchParams(TypedDict, total=False):
+    description: Optional[str]
+    """New group description"""
+
     name: Optional[str]
-    """New sender display name"""
+    """New group display name"""

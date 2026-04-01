@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import Required, TypedDict
 
-__all__ = ["SenderCreateOrUpdateParams"]
+__all__ = ["SenderCreateParams"]
 
 
-class SenderCreateOrUpdateParams(TypedDict, total=False):
+class SenderCreateParams(TypedDict, total=False):
     sender_id: Required[str]
     """Sender identifier (unique)"""
 
