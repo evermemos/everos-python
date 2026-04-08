@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2026-04-08)
+
+Full Changelog: [v0.1.1...v0.2.0](https://github.com/evermemos/everos-python/compare/v0.1.1...v0.2.0)
+
+### Bug Fixes
+
+* **client:** preserve hardcoded query params when merging with user params ([3f38e05](https://github.com/evermemos/everos-python/commit/3f38e05f05eaf4531a2be132ad5db86c7b00fe55))
+
 ## 0.1.1 (2026-04-01)
 
 Full Changelog: [v0.0.1...v0.1.1](https://github.com/evermemos/everos-python/compare/v0.0.1...v0.1.1)
