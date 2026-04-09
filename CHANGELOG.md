@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 (2026-04-09)
+
+Full Changelog: [v0.2.0...v0.4.0](https://github.com/evermemos/everos-python/compare/v0.2.0...v0.4.0)
+
+### Bug Fixes
+
+* bump version for pypi release ([2ed21af](https://github.com/evermemos/everos-python/commit/2ed21afdb5cc767630c63da04f5dd1700731f6ab))
+
 ## 0.2.0 (2026-04-08)
 
 Full Changelog: [v0.1.1...v0.2.0](https://github.com/evermemos/everos-python/compare/v0.1.1...v0.2.0)
