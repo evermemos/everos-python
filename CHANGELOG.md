@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.5.0 (2026-05-13)
+
+Full Changelog: [v0.4.0...v0.5.0](https://github.com/evermemos/everos-python/compare/v0.4.0...v0.5.0)
+
+### Features
+
+* **internal/types:** support eagerly validating pydantic iterators ([1451fbd](https://github.com/evermemos/everos-python/commit/1451fbd01d833fcb2599a568ee21c9f676202652))
+* support setting headers via env ([46b59a6](https://github.com/evermemos/everos-python/commit/46b59a6740b55edd90c03397378fcd42ad424688))
+
+
+### Bug Fixes
+
+* **client:** add missing f-string prefix in file type error message ([6cba326](https://github.com/evermemos/everos-python/commit/6cba32602459373cfc9fb8b59084def350157c70))
+* ensure file data are only sent as 1 parameter ([7f97423](https://github.com/evermemos/everos-python/commit/7f9742390013fde1d28ce3c9a1c42b0222bd8122))
+* use correct field name format for multipart file arrays ([303537d](https://github.com/evermemos/everos-python/commit/303537d277358e0a409c536f3d663608e9aa638e))
+
+
+### Performance Improvements
+
+* **client:** optimize file structure copying in multipart requests ([b7c0131](https://github.com/evermemos/everos-python/commit/b7c013138f18ebb4da63772a1dbd7ed5a8d52daa))
+
+
+### Chores
+
+* **internal:** more robust bootstrap script ([7dad341](https://github.com/evermemos/everos-python/commit/7dad3415471d7207d53d6909826e3a9f6660590d))
+* **internal:** reformat pyproject.toml ([f0b5ef6](https://github.com/evermemos/everos-python/commit/f0b5ef649b2d41029021ab1ff0416d18876f26f7))
+
 ## 0.4.0 (2026-04-09)
 
 Full Changelog: [v0.2.0...v0.4.0](https://github.com/evermemos/everos-python/compare/v0.2.0...v0.4.0)
